@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bootstrap 101 Template</title>
+</head>
+  <body>
+<div class="template" 
+datasrc="http://www.vam.ac.uk/api/json/museumobject/?q=medieval&materialsearch=gold&images=1" 
+type="json"
+>
+<ul>
+{{~ it.records :record:index}}
+<li>{{=record.fields.object_number}} : http://www.vam.ac.uk/api/json/museumobject/{{=record.fields.object_number}}
+<div class="template" 
+datasrc="http://www.vam.ac.uk/api/json/museumobject/{{=record.fields.object_number}}"
+type="json">
+:
+{{=it[0].fields.museum_number}}
+  :
+</div>
+
+</li>
+{{~}}
+
+</ul>
+
+</div>
+
+
+  </body>
+</html>
