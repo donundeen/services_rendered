@@ -11,6 +11,33 @@ if(typeof module !== 'undefined'){
 }
 
 
+
+$.extend({
+  getUrlVars: function(){
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+      hash = hashes[i].split('=');
+      vars.push(hash[0]);
+      vars[hash[0]] = hash[1];
+    }
+    return vars;
+  },
+  getUrlVar: function(name){
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.search);
+    if(results == null)
+      return "";
+    else
+      return decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+});
+
+
+
 function createEngine(doc, vars){
 
 	var options = {
@@ -67,7 +94,10 @@ templateEngine.prototype.processTemplate = function(template){
         if(retdata == ''){
           return true;
         }
+        console.log("parsting");
+        console.log(retdata);
         retdata = jQuery.parseJSON(retdata);
+        console.log("parsed");
        // console.log(retdata);
         var tpl = doT.template($(template).html());
        // console.log(tpl);
@@ -116,6 +146,17 @@ templateEngine.prototype.processTemplates = function(){
   $set = $(".template", this.doc).filter(function(){
     return $(this).parents(".template", this.doc).length < 1;
   });
+
+  console.log("set " + $set.length);
+
+
+  if($set.length == 0){
+
+    if(thisObj.end_function){
+      thisObj.end_function();
+    }else{
+    }
+  }
 
   thisObj.outstandingTasks += $set.length;
 

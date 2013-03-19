@@ -5,26 +5,78 @@
         <title>Demo: Layout with Dijit</title>
         <link rel="stylesheet" href="css/app.css" media="screen">
         <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="doT/doT.js"></script>
+    <script src="ed_template.js"></script>
+    <script src="js-tables/jpath.js"></script>
+    <script type="text/javascript">
+$().ready(function(){
+
+  var defaultTemplate = "http://localhost/services_rendered/goldsearch.html";
+  var proxyurl = "http://localhost/services_rendered/proxy.php";
+
+  var templatename = $.getUrlVar("tpl");
+
+
+  if(templatename){
+    console.log(templatename);
+    templateurl = "http://localhost/services_rendered/"+templatename+".html";
+    console.log(templateurl);
+  }else{
+    templateurl = defaultTemplate;
+
+  }
+
+    $.ajax({
+      url : proxyurl,
+      data : {
+        //url: objJsonUrl,
+        url: templateurl,
+        
+        //cache : "true",
+        
+        //cachefail : "OVER_QUERY_LIMIT"
+        
+      },
+      error : function(retdata){
+        console.log("failure");
+
+      },
+      success : function (retdata){
+        console.log(retdata);
+        var doc = $(retdata); 
+        var engine = createEngine(doc);
+        console.log(doc);
+        engine.onEnd(function(){
+            console.log("done");
+            $('.appContent').replaceWith($(doc).clone()).html();
+        });
+        var result = engine.processTemplates();
+      }
+    });
+
+
+  //var engine = createEngine(window.document);
+ 
+//  var result = engine.processTemplates();
+ 
+});
+    </script>        
     </head>
     <body class="claro">
         <div id="appLayout" class="demoLayout"
             data-dojo-type="dijit/layout/BorderContainer"
             data-dojo-props="design: 'headline'">
-            <div class="centerPanel"
-                data-dojo-type="dijit/layout/ContentPane"
-                data-dojo-props="region: 'center'">
-                <div>
-                    <h4>Group 1 Content</h4>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                </div>
-                <div>
-                    <h4>Group 2 Content</h4>
-                </div>
-                <div>
-                    <h4>Group 3 Content</h4>
-                </div>
+
+            <div class="centerPanel appContent">
+                
             </div>
  
+
+
+
             <div class="edgePanel"
                 data-dojo-type="dijit/layout/ContentPane"
                 data-dojo-props="region: 'top'">Header content (top)</div>
