@@ -7,7 +7,7 @@
             data-dojo-props="title: 'Searching for Gold'">
 some content
 
-<div class="template" 
+<div class="template"  id="goldsearch"
 datasrc="http://www.vam.ac.uk/api/json/museumobject/?q=medieval&materialsearch=gold&images=1" 
 type="json"
 >
@@ -40,10 +40,3 @@ type="json">
                     <h4>Group 3 Content</h4>
                 </div>
             </div>
-<script src="//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/dojo.js"
-                data-dojo-config="async: 1, parseOnLoad: 1">
-    </script>
-    <script>
-    require(["dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/TabContainer",
-        "dijit/layout/ContentPane"]);
-</script>

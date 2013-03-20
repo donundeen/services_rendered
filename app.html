@@ -51,9 +51,15 @@ $().ready(function(){
         console.log(doc);
         engine.onEnd(function(){
             console.log("done");
-            $('.appContent').replaceWith($(doc).clone()).html();
+          $('.appContent').replaceWith($(doc).clone()).html();
+            require(["dojo/parser", "dojo/dom"], function(parser, dom){
+            //  parser.parse(doc);
+              parser.parse();
+            });          
         });
         var result = engine.processTemplates();
+
+
       }
     });
 
@@ -89,7 +95,7 @@ $().ready(function(){
         </div>
         <!-- load dojo and provide config via data attribute -->
         <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/dojo.js"
-                data-dojo-config="async: 1, parseOnLoad: 1">
+                data-dojo-config="async: 1, parseOnLoad: 0">
         </script>
         <script>
     require(["dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/TabContainer",

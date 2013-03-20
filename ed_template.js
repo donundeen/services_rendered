@@ -94,8 +94,8 @@ templateEngine.prototype.processTemplate = function(template){
         if(retdata == ''){
           return true;
         }
-        console.log("parsting");
-        console.log(retdata);
+        console.log("parsing");
+     //   console.log(retdata);
         retdata = jQuery.parseJSON(retdata);
         console.log("parsed");
        // console.log(retdata);
