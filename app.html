@@ -33,12 +33,9 @@ $().ready(function(){
       url : proxyurl,
       data : {
         //url: objJsonUrl,
-        url: templateurl,
-        
+        url: templateurl,    
         //cache : "true",
-        
         //cachefail : "OVER_QUERY_LIMIT"
-        
       },
       error : function(retdata){
         console.log("failure");
@@ -48,14 +45,12 @@ $().ready(function(){
         console.log(retdata);
         var doc = $(retdata); 
 
-
         var engine = createEngine(doc);
         console.log(doc);
 
-        $(".appContent").append(doc);
+        $(".appContent").replaceWith(doc);
 
         var result = engine.processTemplates();
-
 
       }
     });
@@ -76,9 +71,6 @@ $().ready(function(){
             <div class="centerPanel appContent">
                 
             </div>
- 
-
-
 
             <div class="edgePanel"
                 data-dojo-type="dijit/layout/ContentPane"
