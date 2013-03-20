@@ -53,7 +53,7 @@ $().ready(function(){
             console.log("done");
           $('.appContent').replaceWith($(doc).clone()).html();
             require(["dojo/parser", "dojo/dom"], function(parser, dom){
-            //  parser.parse(doc);
+            //  parser.parse(dom.byId("goldsearch"));
               parser.parse();
             });          
         });

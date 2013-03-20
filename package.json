@@ -1,0 +1,21 @@
+{
+  "name": "services_rendered",
+  "version": "0.1.0",
+  "description": "an app for integrating and displaying data from web services",
+  "author": "don undeen <donundeen@yahoo.com>",
+  "dependencies": {
+    "sleep": "1.1.x",
+    "jquery": "1.8.x",
+    "dot": "1.0.x",
+    "xmldom": "0.1.x"
+  },
+  "devDependencies": {
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  },
+  "scripts": {
+
+  }
+}
