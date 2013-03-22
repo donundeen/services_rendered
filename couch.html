@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Demo: Layout with Dijit</title>
+        <link rel="stylesheet" href="css/app.css" media="screen">
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="doT/doT.js"></script>
+    <script src="ed_template.js"></script>
+    <script src="js-tables/jpath.js"></script>
+    <script src="couch.js"></script>
+    <script type="text/javascript">
+$().ready(function(){
+
+
+ var formdef = {
+
+
+ };
+
+ var formvals = {
+ 	name : "larry",
+ 	"dob/year" : "1975"
+
+ };
+
+console.log(formvals);
+
+var proxyurl = "http://localhost/services_rendered/proxy.php";
+
+
+  var db = new CouchDB("http://localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+  var doc = {_id:"0",a:1,b:1};
+  var result = db.save(doc);
+
+  console.log(result);
+
+  console.log("done testing");
+
+function submitToCouch(){
+
+  $.ajax({
+    url : proxyurl,
+    data : {
+      // hi ther.
+      //url: objJsonUrl,
+      url: templateurl,    
+      //cache : "true",
+      //cachefail : "OVER_QUERY_LIMIT"
+    },
+    error : function(retdata){
+      console.log("failure");
+
+    },
+    success : function (retdata){
+
+    }
+  });
+}
+ 
+});
+
+    </script>        
+    </head>
+    <body class="claro">
+        trying out forms and couch
+<div data-dojo-type="dijit/form/Form" id="myForm" data-dojo-id="myForm"
+encType="multipart/form-data" action="" method="">
+    <script type="dojo/on" data-dojo-event="reset">
+    require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
+        return confirm('Press OK to reset widget values');
+    </script>
+
+    <script type="dojo/on" data-dojo-event="submit">
+        if(this.validate()){
+            return confirm('Form is valid, press OK to submit');
+        }else{
+            alert('Form contains invalid data.  Please correct first');
+            return false;
+        }
+        return true;
+    </script>
+
+    <table style="border: 1px solid #9f9f9f;" cellspacing="10">
+        <tr>
+            <td>
+                <label for="name">Name:</label>
+            </td>
+            <td>
+                <input type="text" id="name" name="name" required="true" data-dojo-type="dijit/form/ValidationTextBox"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="dob">Date of birth:</label>
+            </td>
+            <td>
+                <input type="text" id="dob" name="dob" data-dojo-type="dijit/form/DateTextBox"/>
+            </td>
+        </tr>
+    </table>
+
+    <button data-dojo-type="dijit/form/Button" type="button" onClick="console.log(myForm.getValues())">Get Values from form!</button>
+    <button data-dojo-type="dijit/form/Button" type="submit" name="submitButton" value="Submit">Submit</button>
+    <button data-dojo-type="dijit/form/Button" type="reset">Reset</button>
+</div>
+        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/dojo.js"
+                data-dojo-config="async: 1, parseOnLoad: 1">
+        </script>
+        <script>
+            require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox", "dijit/form/DateTextBox"]);
+
+</script>
+    </body>
+</html>

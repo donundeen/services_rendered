@@ -7,7 +7,9 @@
     "sleep": "1.1.x",
     "jquery": "1.8.x",
     "dot": "1.0.x",
-    "xmldom": "0.1.x"
+    "xmldom": "0.1.x",
+    "http-proxy": "0.10.x",
+    "nano": "3.3.x"
   },
   "devDependencies": {
   },
