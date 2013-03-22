@@ -23,7 +23,8 @@ TODOs:
 - page generation from config data
 - NoSQL Caching of data
 - indexing in solr
-
+- look at https://github.com/nodejitsu/node-http-proxy
+- look at http://writings.nunojob.com/2011/08/nano-minimalistic-couchdb-client-for-nodejs.html
 
 
 ARCHITECTURE:

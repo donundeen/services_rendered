@@ -32,7 +32,7 @@ console.log(formvals);
 var proxyurl = "http://localhost/services_rendered/proxy.php";
 
 
-  var db = new CouchDB("http://localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+  var db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
   var doc = {_id:"0",a:1,b:1};
   var result = db.save(doc);
 
