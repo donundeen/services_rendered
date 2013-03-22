@@ -29,31 +29,32 @@ $().ready(function(){
 
   }
 
-    $.ajax({
-      url : proxyurl,
-      data : {
-        //url: objJsonUrl,
-        url: templateurl,    
-        //cache : "true",
-        //cachefail : "OVER_QUERY_LIMIT"
-      },
-      error : function(retdata){
-        console.log("failure");
+  $.ajax({
+    url : proxyurl,
+    data : {
+      // hi ther.
+      //url: objJsonUrl,
+      url: templateurl,    
+      //cache : "true",
+      //cachefail : "OVER_QUERY_LIMIT"
+    },
+    error : function(retdata){
+      console.log("failure");
 
-      },
-      success : function (retdata){
-        console.log(retdata);
-        var doc = $(retdata); 
+    },
+    success : function (retdata){
+      console.log(retdata);
+      var doc = $(retdata); 
 
-        var engine = createEngine(doc);
-        console.log(doc);
+      var engine = createEngine(doc);
+      console.log(doc);
 
-        $(".appContent").replaceWith(doc);
+      $(".appContent").replaceWith(doc);
 
-        var result = engine.processTemplates();
+      var result = engine.processTemplates();
 
-      }
-    });
+    }
+  });
 
 
   //var engine = createEngine(window.document);
