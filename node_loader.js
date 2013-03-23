@@ -5,7 +5,7 @@ alternativemethod for development
 
 and then start adding config bits ad-hoc to avoid over-planning
 
-make it an exercise in learning dijit.
+make it an exercise in learning dijit and mongo/couch.
 
 
 
