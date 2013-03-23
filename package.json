@@ -9,6 +9,7 @@
     "dot": "1.0.x",
     "xmldom": "0.1.x",
     "http-proxy": "0.10.x",
+    "corsproxy": "0.2.x",
     "nano": "3.3.x"
   },
   "devDependencies": {

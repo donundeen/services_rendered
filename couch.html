@@ -16,29 +16,64 @@
 $().ready(function(){
 
 
- var formdef = {
+var formdef = {
 
 
- };
+};
 
- var formvals = {
- 	name : "larry",
+var formvals = {
+    name : "larry",
  	"dob/year" : "1975"
 
- };
+};
 
 console.log(formvals);
 
 var proxyurl = "http://localhost/services_rendered/proxy.php";
 
+var db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
 
-  var db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
-  var doc = {_id:"0",a:1,b:1};
-  var result = db.save(doc);
+//db.deleteDb();
 
-  console.log(result);
 
-  console.log("done testing");
+try{
+    db.info();
+}catch(e){
+    if(e.error == "not_found" && e.reason == "no_db_file"){
+        console.log("creating db");
+        db.createDb();
+    }else{
+        console.log("error");
+        console.log(e);
+    }
+}
+//  db.deleteDb();
+
+console.log(db.info());
+
+var doc = { _id:"0",a:1,b:1};
+
+// get doc, because we need the _rev id to update it.
+try{
+    var storeddoc = db.open("0");
+    console.log(storeddoc);
+    doc._rev = storeddoc._rev;
+}catch(e){
+    console.log("error");
+    console.log(e);  
+}
+
+
+try{
+    var saveresult = db.save(doc);
+}catch(e){
+    console.log("error");
+    console.log(e);  
+}
+
+console.log(saveresult);
+
+console.log("done testing");
 
 function submitToCouch(){
 
