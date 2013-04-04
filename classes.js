@@ -33,6 +33,18 @@ Property
 
 */
 
+var ServiceConfig = Backbone.Model.extend({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+
+		
+	}
+});
+
 
 var Service = Backbone.Model.extend ({
 
@@ -48,6 +60,18 @@ var Service = Backbone.Model.extend ({
 });
 
 
+var EntityConfig = Backbone.Model.extend({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+
+		
+	}
+});
+
 var Entity = Backbone.Model.extend ({
 
 	defaults : {
@@ -61,7 +85,33 @@ var Entity = Backbone.Model.extend ({
 
 });
 
+
+var EntitySectionConfig = Backbone.Model.extend({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+
+		
+	}
+});
 var EntitySection = Backbone.Model.extend ({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+
+		
+	}
+
+});
+
+
+var SectionPropertyConfig = Backbone.Model.extend ({
 
 	defaults : {
 
