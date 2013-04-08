@@ -136,3 +136,8 @@ var SectionProperty = Backbone.Model.extend ({
 	}
 
 });
+
+var SectionPropertyEditable = Backbone.view.extend ({
+
+
+});
