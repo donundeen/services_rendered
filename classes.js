@@ -137,7 +137,59 @@ var SectionProperty = Backbone.Model.extend ({
 
 });
 
-var SectionPropertyEditable = Backbone.view.extend ({
+var SectionPropertyEditable = Backbone.View.extend ({
 
+
+	events : {
+
+
+	},
+
+	initialize : function(){
+		this.listeTo(this.model, "change", this.render);
+
+	},
+
+	render: function(){
+		this.$el.html("the html for the sectionproperty goes here");
+		return this;
+	}
+
+});
+
+
+var Workspace = Backbone.Router.extend({
+
+
+	routes : {
+		"" : "home",
+		"home2" : "home2",
+		"object/:objectid" : "object",
+		"*default" : "defaultAction"
+	},
+
+
+	initialize : function(options){
+		console.log("init routes");
+
+	},
+
+	defaultAction : function(stuff){
+		console.log("catchall " + stuff);
+	},
+
+	home : function(){
+
+		console.log("in home");
+	},
+
+	home2  : function(){
+		console.log("home2");
+
+	},
+
+	object : function (objectid){
+		console.log("object " + objectid);
+	}
 
 });
