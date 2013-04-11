@@ -75,7 +75,8 @@ var EntityConfig = Backbone.Model.extend({
 var Entity = Backbone.Model.extend ({
 
 	defaults : {
-
+		id : null;
+		config : null;
 	},
 
 	initialize : function(){
@@ -137,6 +138,20 @@ var SectionProperty = Backbone.Model.extend ({
 
 });
 
+var EntityViewEditable = Backbone.View.extend ({
+	initialize : function(){
+		this.listenTo(this.model, "change", this.render);
+
+	},
+});
+
+var SectionViewEditable = Backbone.View.extned({
+	initialize : function(){
+		this.listenTo(this.model, "change", this.render);
+
+	},
+});
+
 var SectionPropertyEditable = Backbone.View.extend ({
 
 
@@ -146,7 +161,7 @@ var SectionPropertyEditable = Backbone.View.extend ({
 	},
 
 	initialize : function(){
-		this.listeTo(this.model, "change", this.render);
+		this.listenTo(this.model, "change", this.render);
 
 	},
 
@@ -190,6 +205,10 @@ var Workspace = Backbone.Router.extend({
 
 	object : function (objectid){
 		console.log("object " + objectid);
+		var objectConfig = new EntityConfig({type : "object"});
+		var object = new Entity({id : objectid, config: objectConfig});
+		var view = new EntityView({model: object});
+
 	}
 
 });
