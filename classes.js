@@ -33,46 +33,94 @@ Property
 
 */
 
-var ServiceConfig = Backbone.Model.extend({
+
+
+
+var CouchModel = Backbone.Model.extend({
+
+	db: null;
+
+	connect : function (){
+		this.db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+
+
+	},
+
+	store: function(){
+		var doc = {_id : id , data : this.defaults};
+		try{
+		    var saveresult = db.save(doc);
+		}catch(e){
+		    console.log("error");
+		    console.log(e);  
+		}
+
+	},
+
+	get: function(){
+		try{
+		    var storeddoc = db.open(this.id);
+		    console.log(storeddoc);
+		    this.defaults = storeddoc.data;
+
+		}catch(e){
+		    console.log("error");
+		    console.log(e);  
+		}
+
+
+	}
+
+
+});
+
+
+
+var ServiceConfig = CouchModel.extend({
 
 	defaults : {
 
 	},
 
 	initialize : function(){
+
+		this.get();
+	},
+
+});
+
+
+var Service = CouchModel.extend ({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+		this.get();
+
+
+	}
+
+});
+
+
+var EntityConfig = CouchModel.extend({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+		this.get();
 
 		
 	}
-});
 
-
-var Service = Backbone.Model.extend ({
-
-	defaults : {
-
-	},
-
-	initialize : function(){
-
-
-	}
 
 });
 
-
-var EntityConfig = Backbone.Model.extend({
-
-	defaults : {
-
-	},
-
-	initialize : function(){
-
-		
-	}
-});
-
-var Entity = Backbone.Model.extend ({
+var Entity = CouchModel.extend ({
 
 	defaults : {
 		id : null;
@@ -80,6 +128,7 @@ var Entity = Backbone.Model.extend ({
 	},
 
 	initialize : function(){
+		this.get();
 
 		
 	}
@@ -87,51 +136,59 @@ var Entity = Backbone.Model.extend ({
 });
 
 
-var EntitySectionConfig = Backbone.Model.extend({
+var EntitySectionConfig = CouchModel.extend({
 
 	defaults : {
 
 	},
 
 	initialize : function(){
-
-		
-	}
-});
-var EntitySection = Backbone.Model.extend ({
-
-	defaults : {
-
-	},
-
-	initialize : function(){
+		this.get();
 
 		
 	}
 
+
+
 });
-
-
-var SectionPropertyConfig = Backbone.Model.extend ({
+var EntitySection = CouchModel.extend ({
 
 	defaults : {
 
 	},
 
 	initialize : function(){
+		this.get();
+
+		
+	}
+
+
+});
+
+
+var SectionPropertyConfig = CouchModel.extend ({
+
+	defaults : {
+
+	},
+
+	initialize : function(){
+		this.get();
 
 		
 	}
 
 });
 
-var SectionProperty = Backbone.Model.extend ({
+var SectionProperty = CouchModel.extend ({
 
 	defaults : {
 
 	},
 
 	initialize : function(){
+		this.get();
 
 		
 	}
@@ -143,6 +200,11 @@ var EntityViewEditable = Backbone.View.extend ({
 		this.listenTo(this.model, "change", this.render);
 
 	},
+
+	render : function (){
+
+	}
+
 });
 
 var SectionViewEditable = Backbone.View.extned({
@@ -150,6 +212,11 @@ var SectionViewEditable = Backbone.View.extned({
 		this.listenTo(this.model, "change", this.render);
 
 	},
+
+	render : function (){
+		
+	}
+	
 });
 
 var SectionPropertyEditable = Backbone.View.extend ({
@@ -206,8 +273,10 @@ var Workspace = Backbone.Router.extend({
 	object : function (objectid){
 		console.log("object " + objectid);
 		var objectConfig = new EntityConfig({type : "object"});
-		var object = new Entity({id : objectid, config: objectConfig});
+		var object = new Entity({id : "object/" + objectid, config: objectConfig});
 		var view = new EntityView({model: object});
+
+		view.render();
 
 	}
 
