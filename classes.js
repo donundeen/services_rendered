@@ -34,14 +34,14 @@ Property
 */
 
 
-var db = null;
-
 var CouchModel = Backbone.Model.extend({
 
 
 	db: null,
 
 	serviceRunning : true,
+
+	dontSave : [],
 
 	defaults : {
 	},
@@ -52,26 +52,24 @@ var CouchModel = Backbone.Model.extend({
 			console.log("trying to connect");
 			this.db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
 		}
-
 	},
 
 
 
 
 	store : function(){    
-		
-
 		if(this.db == null){
 			this.connect();
 		}
 		if(this.serviceRunning){
 			var doc = this.clone();//attributes;
-			
-			if(doc.has("config")){
-				doc.set({configName : doc.get("config").get("_id")});
-				delete doc.unset("config");// = null;
-			}
-
+				
+			$(this.dontSave).each(function(index, value){
+				if(doc.has(value)){
+					console.log("unsetting " + value);
+					doc.unset(value);
+				}
+			});
 			try{
 			    var saveresult = this.db.save(doc.attributes);
 			}catch(e){
@@ -93,20 +91,14 @@ var CouchModel = Backbone.Model.extend({
 			    var storeddoc = this.db.open(this.get("_id"));
 			    this.set(storeddoc);
 			    this.set(overrides);
-
-			    /*
-			    this.set({_rev : storedoc._rev});
-			    this.set({_id : storedoc._id});
-*/
 			}catch(e){
 			    console.log("retrieval error");
 			    console.log(e); 
 			}
 		}
-
 	}
-
 });
+
 
 
 var Service = CouchModel.extend ({
@@ -123,16 +115,17 @@ var Service = CouchModel.extend ({
 
 });
 
-
 var EntityConfig = CouchModel.extend({
 
 	defaults : {
 	//	"foo" : "bar",
-
+		sectionConfigs : []
 	},
 
 	initialize : function(){
 		this.load();
+
+		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
 
 	}
 
@@ -141,14 +134,22 @@ var EntityConfig = CouchModel.extend({
 
 var Entity = CouchModel.extend ({
 
-	config : null,
 
 	defaults : {
-		
+		sections : [],
 	},
+
+	dontSave : ["sections", "config"],
 
 	initialize : function(){
 		this.load(arguments[0]);
+
+
+		// load sections here, by looking at this.config to see what sections get loaded..
+		$(this.get("config").get("sectionConfigs")).each(function(index, sectionConfig){
+
+		});
+
 	}
 
 });
@@ -157,31 +158,30 @@ var Entity = CouchModel.extend ({
 var EntitySectionConfig = CouchModel.extend({
 
 	defaults : {
-
+		propertyConfigs : [],
 	},
 
 	initialize : function(){
-		this.load();
-
-		
+		this.load();	
 	}
-
-
-
 });
+
+
 var EntitySection = CouchModel.extend ({
 
 	config : null,
 
+	dontSave : ["properties", "config"],
 
 	defaults : {
-
+		properties : []
 	},
 
 	initialize : function(){
-		this.load();
+		this.load();		
 
-		
+		// load sectionproperties, by looking at this.configs propertyConfigs
+
 	}
 
 
@@ -196,15 +196,13 @@ var SectionPropertyConfig = CouchModel.extend ({
 
 	initialize : function(){
 		this.load();
-
-		
 	}
 
 });
 
 var SectionProperty = CouchModel.extend ({
 
-
+	dontSave : ["config"],
 
 	defaults : {
 
@@ -213,19 +211,23 @@ var SectionProperty = CouchModel.extend ({
 	initialize : function(){
 		this.load();
 
-		
+
 	}
 
 });
 
 var EntityViewEditable = Backbone.View.extend ({
+
+
+// look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
 	initialize : function(){
 		this.listenTo(this.model, "change", this.render);
-
 	},
 
 	render : function (){
-
+		console.log("rendering");
+		this.$el.html("the html for the entity goes here");
+		return this;
 	}
 
 });
@@ -242,7 +244,7 @@ var SectionViewEditable = Backbone.View.extend({
 
 });
 
-var SectionPropertyEditable = Backbone.View.extend ({
+var SectionPropertyViewEditable = Backbone.View.extend ({
 
 
 	events : {
@@ -266,6 +268,7 @@ var SectionPropertyEditable = Backbone.View.extend ({
 
 var Workspace = Backbone.Router.extend({
 
+	viewElem : null,
 
 	routes : {
 		"" : "home",
@@ -276,6 +279,9 @@ var Workspace = Backbone.Router.extend({
 
 	initialize : function(options){
 		console.log("init routes");
+		console.log(options);
+		this.viewElem = options.viewElem;
+		console.log(this.viewElem);
 
 	},
 
@@ -290,11 +296,18 @@ var Workspace = Backbone.Router.extend({
 		console.log("entity " + type + " : " + id);
 
 		var entityConfig = new EntityConfig({_id: "config/" + type});
+
+		// fake up some configs here
+
+
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
 //		entity.set({config: entityConfig});
 		console.log(entity);
 
-		var view = new EntityViewEditable({model : entity});
+
+
+		var view = new EntityViewEditable({model : entity, el : this.viewElem});
+		view.render();
 
 
 		entity.store();

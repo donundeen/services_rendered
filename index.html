@@ -17,14 +17,14 @@
     <script type="text/javascript">
 $().ready(function(){
 console.log("starting");
-  var workspace = new Workspace;
+  var workspace = new Workspace({viewElem : $("#entity")});
 
   Backbone.history.start();
 });
     </script>
   </head>
   <body>
-<div class="main">
+<div id="entity">
 main div
 </div>
   </body>
