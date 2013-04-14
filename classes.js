@@ -34,58 +34,77 @@ Property
 */
 
 
-
+var db = null;
 
 var CouchModel = Backbone.Model.extend({
 
-	db: null;
 
-	connect : function (){
-		this.db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+	db: null,
 
-
-	},
-
-	store: function(){
-		var doc = {_id : id , data : this.defaults};
-		try{
-		    var saveresult = db.save(doc);
-		}catch(e){
-		    console.log("error");
-		    console.log(e);  
-		}
-
-	},
-
-	get: function(){
-		try{
-		    var storeddoc = db.open(this.id);
-		    console.log(storeddoc);
-		    this.defaults = storeddoc.data;
-
-		}catch(e){
-		    console.log("error");
-		    console.log(e);  
-		}
-
-
-	}
-
-
-});
-
-
-
-var ServiceConfig = CouchModel.extend({
+	serviceRunning : true,
 
 	defaults : {
+	},
+
+	connect : function (){
+
+		if(this.serviceRunning){
+			console.log("trying to connect");
+			this.db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+		}
 
 	},
 
-	initialize : function(){
 
-		this.get();
+
+
+	store : function(){    
+		
+
+		if(this.db == null){
+			this.connect();
+		}
+		if(this.serviceRunning){
+			var doc = this.clone();//attributes;
+			
+			if(doc.has("config")){
+				doc.set({configName : doc.get("config").get("_id")});
+				delete doc.unset("config");// = null;
+			}
+
+			try{
+			    var saveresult = this.db.save(doc.attributes);
+			}catch(e){
+			    console.log("store error");
+			    console.log(e);  
+			}
+		}
+		
 	},
+
+
+	load: function(overrides){
+
+		if(this.db === null){
+			this.connect();
+		}		
+		if(this.serviceRunning){
+			try{
+			    var storeddoc = this.db.open(this.get("_id"));
+			    this.set(storeddoc);
+			    this.set(overrides);
+
+			    /*
+			    this.set({_rev : storedoc._rev});
+			    this.set({_id : storedoc._id});
+*/
+			}catch(e){
+			    console.log("retrieval error");
+			    console.log(e); 
+			}
+		}
+
+	}
 
 });
 
@@ -97,7 +116,7 @@ var Service = CouchModel.extend ({
 	},
 
 	initialize : function(){
-		this.get();
+		this.load();
 
 
 	}
@@ -108,13 +127,13 @@ var Service = CouchModel.extend ({
 var EntityConfig = CouchModel.extend({
 
 	defaults : {
+	//	"foo" : "bar",
 
 	},
 
 	initialize : function(){
-		this.get();
+		this.load();
 
-		
 	}
 
 
@@ -122,15 +141,14 @@ var EntityConfig = CouchModel.extend({
 
 var Entity = CouchModel.extend ({
 
+	config : null,
+
 	defaults : {
-		id : null;
-		config : null;
+		
 	},
 
 	initialize : function(){
-		this.get();
-
-		
+		this.load(arguments[0]);
 	}
 
 });
@@ -143,7 +161,7 @@ var EntitySectionConfig = CouchModel.extend({
 	},
 
 	initialize : function(){
-		this.get();
+		this.load();
 
 		
 	}
@@ -153,12 +171,15 @@ var EntitySectionConfig = CouchModel.extend({
 });
 var EntitySection = CouchModel.extend ({
 
+	config : null,
+
+
 	defaults : {
 
 	},
 
 	initialize : function(){
-		this.get();
+		this.load();
 
 		
 	}
@@ -174,7 +195,7 @@ var SectionPropertyConfig = CouchModel.extend ({
 	},
 
 	initialize : function(){
-		this.get();
+		this.load();
 
 		
 	}
@@ -183,12 +204,14 @@ var SectionPropertyConfig = CouchModel.extend ({
 
 var SectionProperty = CouchModel.extend ({
 
+
+
 	defaults : {
 
 	},
 
 	initialize : function(){
-		this.get();
+		this.load();
 
 		
 	}
@@ -207,7 +230,7 @@ var EntityViewEditable = Backbone.View.extend ({
 
 });
 
-var SectionViewEditable = Backbone.View.extned({
+var SectionViewEditable = Backbone.View.extend({
 	initialize : function(){
 		this.listenTo(this.model, "change", this.render);
 
@@ -216,7 +239,7 @@ var SectionViewEditable = Backbone.View.extned({
 	render : function (){
 		
 	}
-	
+
 });
 
 var SectionPropertyEditable = Backbone.View.extend ({
@@ -240,13 +263,13 @@ var SectionPropertyEditable = Backbone.View.extend ({
 });
 
 
+
 var Workspace = Backbone.Router.extend({
 
 
 	routes : {
 		"" : "home",
-		"home2" : "home2",
-		"object/:objectid" : "object",
+		"entity/:type/:entityid" : "entity",
 		"*default" : "defaultAction"
 	},
 
@@ -260,24 +283,30 @@ var Workspace = Backbone.Router.extend({
 		console.log("catchall " + stuff);
 	},
 
+
+
+	entity : function (type, id){
+
+		console.log("entity " + type + " : " + id);
+
+		var entityConfig = new EntityConfig({_id: "config/" + type});
+		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
+//		entity.set({config: entityConfig});
+		console.log(entity);
+
+		var view = new EntityViewEditable({model : entity});
+
+
+		entity.store();
+		entityConfig.store();
+
+	},
+
 	home : function(){
 
 		console.log("in home");
 	},
 
-	home2  : function(){
-		console.log("home2");
-
-	},
-
-	object : function (objectid){
-		console.log("object " + objectid);
-		var objectConfig = new EntityConfig({type : "object"});
-		var object = new Entity({id : "object/" + objectid, config: objectConfig});
-		var view = new EntityView({model: object});
-
-		view.render();
-
-	}
 
 });
+

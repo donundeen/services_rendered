@@ -47,6 +47,7 @@ function CouchDB(url, name, httpHeaders) {
   // Save a document to the database
   this.save = function(doc, options, http_headers) {
     if (doc._id == undefined) {
+
       doc._id = CouchDB.newUuids(1)[0];
     }
     http_headers = http_headers || {};
