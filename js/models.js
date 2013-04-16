@@ -44,6 +44,7 @@ var CouchModel = Backbone.Model.extend({
 	dontSave : [],
 
 	defaults : {
+		ident : "CouchModel",
 	},
 
 	connect : function (){
@@ -104,26 +105,31 @@ var CouchModel = Backbone.Model.extend({
 var Service = CouchModel.extend ({
 
 	defaults : {
+		ident : "Service",
 
 	},
 
 	initialize : function(){
-		this.load();
+	//	this.load();
 
 
 	}
 
 });
 
+
+
 var EntityConfig = CouchModel.extend({
 
 	defaults : {
 	//	"foo" : "bar",
-		sectionConfigs : []
+		sectionConfigs :  new Backbone.Collection([], {model : SectionConfig}),
+		ident : "EntityConfig",
+
 	},
 
 	initialize : function(){
-		this.load();
+	//	this.load();
 
 		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
 
@@ -132,55 +138,70 @@ var EntityConfig = CouchModel.extend({
 
 });
 
+
+
 var Entity = CouchModel.extend ({
 
 
 	defaults : {
-		sections : [],
+		sections :  new Backbone.Collection([], {model : Section}),
+		ident : "Entity",
 	},
 
 	dontSave : ["sections", "config"],
 
 	initialize : function(){
-		this.load(arguments[0]);
-
+	//	this.load(arguments[0]);
+		var realthis = this;
 
 		// load sections here, by looking at this.config to see what sections get loaded..
-		$(this.get("config").get("sectionConfigs")).each(function(index, sectionConfig){
-
+		this.get("config").get("sectionConfigs").each(function(sectionConfig){
+			var section = new Section({config : sectionConfig, parent : realthis});
+			realthis.get("sections").add(section);
 		});
+	},
+
+	doThing : function(){
+		this.get("sections").first().get("properties").first().set({value : "beef"});
 
 	}
 
 });
 
 
-var EntitySectionConfig = CouchModel.extend({
+var SectionConfig = CouchModel.extend({
 
 	defaults : {
-		propertyConfigs : [],
+    	ident : "SectionConfig",
+		propertyConfigs :  new Backbone.Collection([], {model : PropertyConfig}),		
 	},
 
 	initialize : function(){
-		this.load();	
+	//	this.load();	
 	}
 });
 
 
-var EntitySection = CouchModel.extend ({
+var Section = CouchModel.extend ({
 
 	config : null,
 
 	dontSave : ["properties", "config"],
 
 	defaults : {
-		properties : []
+		ident : "Section",
+		properties :  new Backbone.Collection([], {model : Property}),
 	},
 
 	initialize : function(){
-		this.load();		
+	//	this.load();		
+		// load properties, by looking at this.configs propertyConfigs
+		var realthis = this;
 
-		// load sectionproperties, by looking at this.configs propertyConfigs
+		this.get("config").get("propertyConfigs").each(function(propertyConfig){
+			var property = new Property({config : propertyConfig, parent: realthis});
+			realthis.get("properties").add(property);
+		});		
 
 	}
 
@@ -188,138 +209,32 @@ var EntitySection = CouchModel.extend ({
 });
 
 
-var SectionPropertyConfig = CouchModel.extend ({
-
+var PropertyConfig = CouchModel.extend ({
 	defaults : {
-
+		ident : "PropertyConfig",
 	},
 
 	initialize : function(){
-		this.load();
+		//this.load();
 	}
 
 });
 
-var SectionProperty = CouchModel.extend ({
+var Property = CouchModel.extend ({
+
 
 	dontSave : ["config"],
 
 	defaults : {
+		ident : "Property",
+		value : "chicken",
 
 	},
 
 	initialize : function(){
-		this.load();
-
+	//	this.load();
 
 	}
-
-});
-
-var EntityViewEditable = Backbone.View.extend ({
-
-
-// look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
-	initialize : function(){
-		this.listenTo(this.model, "change", this.render);
-	},
-
-	render : function (){
-		console.log("rendering");
-		this.$el.html("the html for the entity goes here");
-		return this;
-	}
-
-});
-
-var SectionViewEditable = Backbone.View.extend({
-	initialize : function(){
-		this.listenTo(this.model, "change", this.render);
-
-	},
-
-	render : function (){
-		
-	}
-
-});
-
-var SectionPropertyViewEditable = Backbone.View.extend ({
-
-
-	events : {
-
-
-	},
-
-	initialize : function(){
-		this.listenTo(this.model, "change", this.render);
-
-	},
-
-	render: function(){
-		this.$el.html("the html for the sectionproperty goes here");
-		return this;
-	}
-
-});
-
-
-
-var Workspace = Backbone.Router.extend({
-
-	viewElem : null,
-
-	routes : {
-		"" : "home",
-		"entity/:type/:entityid" : "entity",
-		"*default" : "defaultAction"
-	},
-
-
-	initialize : function(options){
-		console.log("init routes");
-		console.log(options);
-		this.viewElem = options.viewElem;
-		console.log(this.viewElem);
-
-	},
-
-	defaultAction : function(stuff){
-		console.log("catchall " + stuff);
-	},
-
-
-
-	entity : function (type, id){
-
-		console.log("entity " + type + " : " + id);
-
-		var entityConfig = new EntityConfig({_id: "config/" + type});
-
-		// fake up some configs here
-
-
-		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
-//		entity.set({config: entityConfig});
-		console.log(entity);
-
-
-
-		var view = new EntityViewEditable({model : entity, el : this.viewElem});
-		view.render();
-
-
-		entity.store();
-		entityConfig.store();
-
-	},
-
-	home : function(){
-
-		console.log("in home");
-	},
-
 
 });
 
