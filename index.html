@@ -19,10 +19,12 @@
     <script src="js/propertytypes.js"></script>
     <script type="text/javascript">
 $().ready(function(){
-console.log("starting");
+  console.log("starting");
   var workspace = new Workspace({viewElem : $("#entity")});
 
   Backbone.history.start();
+  console.log("done");
+
 });
     </script>
   </head>
