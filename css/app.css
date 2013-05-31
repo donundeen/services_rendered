@@ -4,6 +4,11 @@ html, body {
     overflow: hidden;
     padding: 0;
 }
+
+div {
+	border: 1px solid black;
+
+}
  
 #appLayout {
     height: 100%;

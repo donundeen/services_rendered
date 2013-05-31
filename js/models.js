@@ -51,7 +51,7 @@ var CouchModel = Backbone.Model.extend({
 
 		if(this.serviceRunning){
 			console.log("trying to connect");
-			this.db = new CouchDB("http://localhost:8080/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+			this.db = new CouchDB("http://localhost:8088/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
 		}
 	},
 
@@ -103,15 +103,22 @@ var CouchModel = Backbone.Model.extend({
 
 
 var Service = CouchModel.extend ({
+	// services encapsulate everything you need to describe a webservice, but not he specific CALL of that service.
+	/* things like : 
+		uri
+		name
+		variables 
+		return type
 
+
+	*/
 	defaults : {
 		ident : "Service",
 
 	},
 
 	initialize : function(){
-	//	this.load();
-
+		//	this.load();
 
 	}
 
@@ -132,6 +139,20 @@ var EntityConfig = CouchModel.extend({
 	//	this.load();
 
 		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
+
+	},
+
+
+	addSectionConfig : function(){
+		// what do we need to add a new, undescribed sectionConfig?
+
+		// add the empty setionConfig
+
+		// then let entities that use this config know that they need to add an entity with that config
+
+		// therefore, need entities to be able to listen to 'addSectionConfig' events in thier config models
+
+		this.sectionConfigs.add({});
 
 	}
 
@@ -154,16 +175,38 @@ var Entity = CouchModel.extend ({
 	//	this.load(arguments[0]);
 		var realthis = this;
 
+		// need to attach a listener to the config, so when changes happen to the config, this model is notified.
+		this.listenTo(this.get("config"), "change", this.configChanged);
+		this.listenTo(this.get("config").get("sectionConfigs"), "add", this.sectionConfigAdded);
+
+
 		// load sections here, by looking at this.config to see what sections get loaded..
 		this.get("config").get("sectionConfigs").each(function(sectionConfig){
-			var section = new Section({config : sectionConfig, parent : realthis});
-			realthis.get("sections").add(section);
+			realthis.addSection(sectionConfig);
 		});
 	},
 
 	doThing : function(){
 		this.get("sections").first().get("properties").first().set({value : "beef"});
 
+	},
+
+	configChanged : function(var1){
+		// for when config attributes change
+	},
+
+
+	propertyConfigAdded : function(sectionConfig, entireList){
+		// for when sections are added
+		this.addSection(sectionConfig);
+	},
+
+
+	addSection : function(sectionConfig){
+		// what do we need when we add a new section?
+		// should already have a config to go with it, even if that config doesn't have any details
+		var section = new Section({config : sectionConfig, parent: this});
+		this.get("sections").add(section);
 	}
 
 });
@@ -177,8 +220,18 @@ var SectionConfig = CouchModel.extend({
 	},
 
 	initialize : function(){
-	//	this.load();	
+		//	this.load();	
+	},
+
+	addPropertyConfig : function(){
+		// what details do we need for a new, unformed propertyConfig?
+		console.log("adding propertyConfig");
+		this.get("propertyConfigs").add({});
+		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
+		// need to notify all sections that use this config that the config has changed.
+
 	}
+
 });
 
 
@@ -194,15 +247,33 @@ var Section = CouchModel.extend ({
 	},
 
 	initialize : function(){
-	//	this.load();		
-		// load properties, by looking at this.configs propertyConfigs
 		var realthis = this;
+		//	this.load();		
 
+		// need to attach listener to the config, so that when the config changes, this class is notified.
+		this.listenTo(this.get("config"), "change", this.configChanged);
+		this.listenTo(this.get("config").get("propertyConfigs"), "add", this.propertyConfigAdded);
+
+
+		// load properties, by looking at this.configs propertyConfigs
 		this.get("config").get("propertyConfigs").each(function(propertyConfig){
-			var property = new Property({config : propertyConfig, parent: realthis});
-			realthis.get("properties").add(property);
+			realthis.addProperty(propertyConfig);
+//			var property = new Property({config : propertyConfig, parent: realthis});
+//			realthis.get("properties").add(property);
 		});		
+	},
 
+	configChanged : function(var1){
+	},
+
+
+	propertyConfigAdded : function(propertyConfig, entireList){
+		this.addProperty(propertyConfig);
+	},
+
+	addProperty : function(propertyConfig){
+		var property = new Property({config : propertyConfig, parent: this});
+		this.get("properties").add(property);
 	}
 
 
@@ -212,6 +283,7 @@ var Section = CouchModel.extend ({
 var PropertyConfig = CouchModel.extend ({
 	defaults : {
 		ident : "PropertyConfig",
+
 	},
 
 	initialize : function(){

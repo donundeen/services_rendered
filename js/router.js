@@ -1,4 +1,4 @@
-
+   
 
 var Workspace = Backbone.Router.extend({
 
@@ -36,11 +36,15 @@ var Workspace = Backbone.Router.extend({
 			name : "countryCode",
 			type : "text"
 		});
+		var propconf2 = new PropertyConfig({
+			name : "state",
+			type : "text"
+		});
 
 		var secconf1 = new SectionConfig({
 			name : "geography",
 			service : service,
-			propertyConfigs :  new Backbone.Collection([propconf1], {model : PropertyConfig}),
+			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
 		});
 
 		var entityConfig = new EntityConfig({_id: "config/" + type,
