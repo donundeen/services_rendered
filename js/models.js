@@ -151,8 +151,9 @@ var EntityConfig = CouchModel.extend({
 		// then let entities that use this config know that they need to add an entity with that config
 
 		// therefore, need entities to be able to listen to 'addSectionConfig' events in thier config models
-
-		this.sectionConfigs.add({});
+		console.log("addSectionConfig");
+		this.get("sectionConfigs").add({});
+		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
 
 	}
 

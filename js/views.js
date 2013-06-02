@@ -20,7 +20,6 @@ var EntityViewEditable = Backbone.View.extend ({
 
 // look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
 	initialize : function(){
-		this.listenTo(this.model, "change", this.modelChanged);
 
 		// the config element, should be hidable, default hidden
 		this.configElem = $("<div class='entityConfigDiv'></div>");
@@ -31,14 +30,11 @@ var EntityViewEditable = Backbone.View.extend ({
 		this.$el.append(this.configElem);
 		new EntityConfigViewEditable({model : this.model.get("config"), el : this.configElem });
 
-
 		// building up the sections
-		var realthis = this;
-		this.model.get("sections").each(function(section){
-			var sectionElem = $("<div class='sectionDiv'></div>");
-			realthis.sectionsElem.append(sectionElem);
-			new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
-		});
+
+		this.listenTo(this.model, "change", this.modelChanged);
+		this.listenTo(this.model.get("config"), "change", this.modelChanged);	
+
 		this.render();
 	},
 
@@ -46,45 +42,23 @@ var EntityViewEditable = Backbone.View.extend ({
 		//this.$el.html("the html for the entity goes here");
 		var name = this.model.get("_id");
 		this.contentElem.html(name);
+		this.sectionsElem.empty();
+		var realthis = this;
+		this.model.get("sections").each(function(section){
+			var sectionElem = $("<div class='sectionDiv'></div>");
+			realthis.sectionsElem.append(sectionElem);
+			new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
+		});		
 		return this;
 	},
 
 	modelChanged : function(){
+		console.log("entityChanged");
 		this.render();
 
 	}
 
 });
-
-
-
-var EntityConfigViewEditable = Backbone.View.extend ({
-
-	ident : "EntityConfigViewEditable",
-	tagName : "div",
-
-// look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
-	initialize : function(){
-		this.listenTo(this.model, "change", this.modelChanged);
-
-		// build up dijit form that's editable
-
-		this.render();
-	},
-
-	render : function (){
-		//this.$el.html("the html for the entity goes here");
-		var configSpan = $("<span class='entityConfigLink'>eC</span>");
-		this.$el.html(configSpan);
-		return this;
-	},
-
-	modelChanged : function(){
-		this.render();
-	}
-
-});
-
 
 
 
@@ -137,6 +111,64 @@ var SectionViewEditable = Backbone.View.extend({
 
 });
 
+var EntityConfigViewEditable = Backbone.View.extend ({
+
+	ident : "EntityConfigViewEditable",
+	tagName : "div",
+
+// look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
+	initialize : function(){
+		this.listenTo(this.model, "change", this.modelChanged);
+
+		// build up dijit form that's editable
+		var configSpan = $("<span class='entityConfigLink'>eC</span>");
+		var realthis = this;
+		this.editDiv = $("<div class='entityConfigEdit'>");
+
+		var configForm = $("<form>");
+		this.editDiv.append(configForm);
+		configForm.append("name:<input type='text' name = 'name' value='"+this.model.get("name")+"' />");
+
+		var addSectionDiv = $("<span>add Section</span>");
+		this.editDiv.append(addSectionDiv);
+		addSectionDiv.click(function(){
+			console.log("adding");
+			realthis.model.addSectionConfig();
+		});
+
+
+		configForm.change(function(changed){
+			console.log(changed.target.name);
+			realthis.model.set(changed.target.name, changed.target.value);
+		});
+
+		this.editDiv.hide();
+		var realthis = this;
+		configSpan.click(function(){realthis.editDiv.toggle();});
+
+		this.$el.append(configSpan);
+		this.$el.append(this.editDiv);
+
+
+		this.listenTo(this.model, "change", this.modelChanged);
+		this.render();
+
+	},
+
+	render : function (){
+		//this.$el.html("the html for the entity goes here");
+		return this;
+	},
+
+	modelChanged : function(){
+		this.render();
+	}
+
+});
+
+
+
+
 
 
 var SectionConfigViewEditable = Backbone.View.extend ({
@@ -152,7 +184,6 @@ var SectionConfigViewEditable = Backbone.View.extend ({
 		this.editDiv = $("<div class='sectionConfigEdit'>");
 
 		var configForm = $("<form>");
-
 		this.editDiv.append(configForm);
 		configForm.append("name:<input type='text' name = 'name' value='"+this.model.get("name")+"' />");
 		configForm.append("uri: <input  type='text'  name = 'uri' value='"+this.model.get("service").get("uri")+"' />");

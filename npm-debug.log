@@ -1,0 +1,67 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', 'dijit' ]
+2 info using npm@1.2.18
+3 info using node@v0.10.4
+4 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/package.json
+5 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/backbone/package.json
+6 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/bootstrap/package.json
+7 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/corsproxy/package.json
+8 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/dojo/package.json
+9 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/dot/package.json
+10 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/http-proxy/package.json
+11 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/jquery/package.json
+12 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/json2/package.json
+13 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/nano/package.json
+14 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/sleep/package.json
+15 verbose read json /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/node_modules/xmldom/package.json
+16 verbose from cache /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered/package.json
+17 verbose readDependencies using package.json deps
+18 verbose cache add [ 'dijit', null ]
+19 verbose cache add name=undefined spec="dijit" args=["dijit",null]
+20 verbose parsed url { protocol: null,
+20 verbose parsed url   slashes: null,
+20 verbose parsed url   auth: null,
+20 verbose parsed url   host: null,
+20 verbose parsed url   port: null,
+20 verbose parsed url   hostname: null,
+20 verbose parsed url   hash: null,
+20 verbose parsed url   search: null,
+20 verbose parsed url   query: null,
+20 verbose parsed url   pathname: 'dijit',
+20 verbose parsed url   path: 'dijit',
+20 verbose parsed url   href: 'dijit' }
+21 silly lockFile e5cb3ac8-dijit dijit
+22 verbose lock dijit /Users/donundeen/.npm/e5cb3ac8-dijit.lock
+23 silly lockFile e5cb3ac8-dijit dijit
+24 silly lockFile e5cb3ac8-dijit dijit
+25 verbose addNamed [ 'dijit', '' ]
+26 verbose addNamed [ null, '' ]
+27 silly lockFile ea189586-dijit dijit@
+28 verbose lock dijit@ /Users/donundeen/.npm/ea189586-dijit.lock
+29 silly addNameRange { name: 'dijit', range: '', hasData: false }
+30 verbose url raw dijit
+31 verbose url resolving [ 'https://registry.npmjs.org/', './dijit' ]
+32 verbose url resolved https://registry.npmjs.org/dijit
+33 info trying registry request attempt 1 at 11:28:24
+34 http GET https://registry.npmjs.org/dijit
+35 http 404 https://registry.npmjs.org/dijit
+36 silly registry.get cb [ 404,
+36 silly registry.get   { server: 'CouchDB/1.3.0 (Erlang OTP/R15B03)',
+36 silly registry.get     date: 'Sat, 01 Jun 2013 15:28:20 GMT',
+36 silly registry.get     'content-type': 'application/json',
+36 silly registry.get     'content-length': '52',
+36 silly registry.get     'cache-control': 'must-revalidate' } ]
+37 silly lockFile ea189586-dijit dijit@
+38 silly lockFile ea189586-dijit dijit@
+39 error 404 'dijit' is not in the npm registry.
+39 error 404 You should bug the author to publish it
+39 error 404
+39 error 404 Note that you can also install from a
+39 error 404 tarball, folder, or http url, or git url.
+40 error System Darwin 12.3.0
+41 error command "node" "/usr/local/bin/npm" "install" "dijit"
+42 error cwd /Users/donundeen/Library/Containers/com.bitnami.mampstack/Data/app-5_4_9/apache2/htdocs/node/services_rendered
+43 error node -v v0.10.4
+44 error npm -v 1.2.18
+45 error code E404
+46 verbose exit [ 1, true ]
