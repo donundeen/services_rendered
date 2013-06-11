@@ -1,0 +1,10 @@
+http://localhost:8080/node/services_rendered/goldsearch.html 
+http://localhost:8080/node/services_rendered/goldsearch.html 
+http://localhost:8080/node/services_rendered/goldsearch.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 
+http://localhost:8080/node/services_rendered/tpl/goldsearch.tpl.html 

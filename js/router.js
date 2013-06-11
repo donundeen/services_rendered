@@ -32,6 +32,7 @@ var Workspace = Backbone.Router.extend({
 
 
 		// fake up some configs here
+		/*
 		var propconf1 = new PropertyConfig({
 			name : "countryCode",
 			type : "text"
@@ -46,9 +47,11 @@ var Workspace = Backbone.Router.extend({
 			service : service,
 			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
 		});
+*/
 
 		var entityConfig = new EntityConfig({_id: "config/" + type,
-											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
+//											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
+											sectionConfigs : new Backbone.Collection([], {model : SectionConfig})
 							});
 
 

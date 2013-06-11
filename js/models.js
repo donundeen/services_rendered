@@ -78,7 +78,6 @@ var CouchModel = Backbone.Model.extend({
 			    console.log(e);  
 			}
 		}
-		
 	},
 
 
@@ -109,17 +108,13 @@ var Service = CouchModel.extend ({
 		name
 		variables 
 		return type
-
-
 	*/
 	defaults : {
 		ident : "Service",
-
 	},
 
 	initialize : function(){
 		//	this.load();
-
 	}
 
 });
@@ -132,14 +127,11 @@ var EntityConfig = CouchModel.extend({
 	//	"foo" : "bar",
 		sectionConfigs :  new Backbone.Collection([], {model : SectionConfig}),
 		ident : "EntityConfig",
-
 	},
 
 	initialize : function(){
-	//	this.load();
-
+		//	this.load();
 		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
-
 	},
 
 
@@ -151,13 +143,10 @@ var EntityConfig = CouchModel.extend({
 		// then let entities that use this config know that they need to add an entity with that config
 
 		// therefore, need entities to be able to listen to 'addSectionConfig' events in thier config models
-		console.log("addSectionConfig");
 		this.get("sectionConfigs").add({});
 		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
 
 	}
-
-
 });
 
 
@@ -168,6 +157,7 @@ var Entity = CouchModel.extend ({
 	defaults : {
 		sections :  new Backbone.Collection([], {model : Section}),
 		ident : "Entity",
+		title : "untitled"
 	},
 
 	dontSave : ["sections", "config"],
@@ -180,7 +170,6 @@ var Entity = CouchModel.extend ({
 		this.listenTo(this.get("config"), "change", this.configChanged);
 		this.listenTo(this.get("config").get("sectionConfigs"), "add", this.sectionConfigAdded);
 
-
 		// load sections here, by looking at this.config to see what sections get loaded..
 		this.get("config").get("sectionConfigs").each(function(sectionConfig){
 			realthis.addSection(sectionConfig);
@@ -189,19 +178,16 @@ var Entity = CouchModel.extend ({
 
 	doThing : function(){
 		this.get("sections").first().get("properties").first().set({value : "beef"});
-
 	},
 
 	configChanged : function(var1){
 		// for when config attributes change
 	},
 
-
-	propertyConfigAdded : function(sectionConfig, entireList){
+	sectionConfigAdded : function(sectionConfig, entireList){
 		// for when sections are added
 		this.addSection(sectionConfig);
 	},
-
 
 	addSection : function(sectionConfig){
 		// what do we need when we add a new section?
@@ -209,7 +195,6 @@ var Entity = CouchModel.extend ({
 		var section = new Section({config : sectionConfig, parent: this});
 		this.get("sections").add(section);
 	}
-
 });
 
 
@@ -217,7 +202,8 @@ var SectionConfig = CouchModel.extend({
 
 	defaults : {
     	ident : "SectionConfig",
-		propertyConfigs :  new Backbone.Collection([], {model : PropertyConfig}),		
+		propertyConfigs :  new Backbone.Collection([], {model : PropertyConfig}),	
+		name: "new section",	
 	},
 
 	initialize : function(){
@@ -226,13 +212,11 @@ var SectionConfig = CouchModel.extend({
 
 	addPropertyConfig : function(){
 		// what details do we need for a new, unformed propertyConfig?
-		console.log("adding propertyConfig");
-		this.get("propertyConfigs").add({});
+		var propertyConfig = new PropertyConfig({});
+		this.get("propertyConfigs").add(propertyConfig);
 		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
 		// need to notify all sections that use this config that the config has changed.
-
 	}
-
 });
 
 
@@ -255,12 +239,9 @@ var Section = CouchModel.extend ({
 		this.listenTo(this.get("config"), "change", this.configChanged);
 		this.listenTo(this.get("config").get("propertyConfigs"), "add", this.propertyConfigAdded);
 
-
 		// load properties, by looking at this.configs propertyConfigs
 		this.get("config").get("propertyConfigs").each(function(propertyConfig){
 			realthis.addProperty(propertyConfig);
-//			var property = new Property({config : propertyConfig, parent: realthis});
-//			realthis.get("properties").add(property);
 		});		
 	},
 
@@ -276,38 +257,33 @@ var Section = CouchModel.extend ({
 		var property = new Property({config : propertyConfig, parent: this});
 		this.get("properties").add(property);
 	}
-
-
 });
 
 
 var PropertyConfig = CouchModel.extend ({
 	defaults : {
 		ident : "PropertyConfig",
-
+		name  : "new property",
 	},
 
 	initialize : function(){
+		console.log("new propertyconfig");
 		//this.load();
 	}
-
 });
 
 var Property = CouchModel.extend ({
-
 
 	dontSave : ["config"],
 
 	defaults : {
 		ident : "Property",
-		value : "chicken",
-
+		value : "default value",
 	},
 
 	initialize : function(){
+		console.log("new proprty");
 	//	this.load();
-
 	}
-
 });
 

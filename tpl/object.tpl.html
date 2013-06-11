@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+            <div class="centerPanel"
+                data-dojo-type="dijit/layout/TabContainer"
+                data-dojo-props="region: 'center', tabPosition: 'top'">
+                <div
+                data-dojo-type="dijit/layout/ContentPane"
+            data-dojo-props="title: 'Searching for Gold'">
+                    <div class="template" 
+datasrc="http://www.vam.ac.uk/api/json/museumobject/?q=medieval&materialsearch=gold&images=1" 
+type="json"
+>
+<ul>
+{{~ it.records :record:index}}
+<li>{{=record.fields.object_number}} : http://www.vam.ac.uk/api/json/museumobject/{{=record.fields.object_number}}
+<div class="template" 
+datasrc="http://www.vam.ac.uk/api/json/museumobject/{{=record.fields.object_number}}"
+type="json">
+:
+{{=it[0].fields.museum_number}}
+  :
+</div>
+
+</li>
+{{~}}
+
+</ul>
+
+</div>
+                </div>
+                <div data-dojo-type="dijit/layout/ContentPane"
+            data-dojo-props="title: 'Group 1'">
+                    <h4>Group 2 Content</h4>
+                </div>
+                <div data-dojo-type="dijit/layout/ContentPane"
+            data-dojo-props="title: 'Group 1'">
+                    <h4>Group 3 Content</h4>
+                </div>
+            </div>

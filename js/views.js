@@ -40,8 +40,8 @@ var EntityViewEditable = Backbone.View.extend ({
 
 	render : function (){
 		//this.$el.html("the html for the entity goes here");
-		var name = this.model.get("_id");
-		this.contentElem.html(name);
+		var id = this.model.get("_id");
+		this.contentElem.html("id: " +id);
 		this.sectionsElem.empty();
 		var realthis = this;
 		this.model.get("sections").each(function(section){
@@ -53,9 +53,7 @@ var EntityViewEditable = Backbone.View.extend ({
 	},
 
 	modelChanged : function(){
-		console.log("entityChanged");
 		this.render();
-
 	}
 
 });
@@ -100,13 +98,10 @@ var SectionViewEditable = Backbone.View.extend({
 		this.contentElem.html(name);
 		return this;
 		//$(this.propertyViews).each(function(index, propertyView){propertyView.render()});
-		
 	},
 
 	modelChanged : function(){
-		console.log("rerendering");
 		this.render();
-
 	}	
 
 });
@@ -118,7 +113,6 @@ var EntityConfigViewEditable = Backbone.View.extend ({
 
 // look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
 	initialize : function(){
-		this.listenTo(this.model, "change", this.modelChanged);
 
 		// build up dijit form that's editable
 		var configSpan = $("<span class='entityConfigLink'>eC</span>");
@@ -127,12 +121,12 @@ var EntityConfigViewEditable = Backbone.View.extend ({
 
 		var configForm = $("<form>");
 		this.editDiv.append(configForm);
-		configForm.append("name:<input type='text' name = 'name' value='"+this.model.get("name")+"' />");
+//		configForm.append("name:<input type='text' name = 'name' value='"+this.model.get("name")+"' />");
 
 		var addSectionDiv = $("<span>add Section</span>");
 		this.editDiv.append(addSectionDiv);
 		addSectionDiv.click(function(){
-			console.log("adding");
+			console.log("adding sectionConfig");
 			realthis.model.addSectionConfig();
 		});
 
@@ -148,7 +142,6 @@ var EntityConfigViewEditable = Backbone.View.extend ({
 
 		this.$el.append(configSpan);
 		this.$el.append(this.editDiv);
-
 
 		this.listenTo(this.model, "change", this.modelChanged);
 		this.render();
@@ -186,8 +179,10 @@ var SectionConfigViewEditable = Backbone.View.extend ({
 		var configForm = $("<form>");
 		this.editDiv.append(configForm);
 		configForm.append("name:<input type='text' name = 'name' value='"+this.model.get("name")+"' />");
-		configForm.append("uri: <input  type='text'  name = 'uri' value='"+this.model.get("service").get("uri")+"' />");
 
+		if(this.model.get("service")){
+			configForm.append("uri: <input  type='text'  name = 'uri' value='"+this.model.get("service").get("uri")+"' />");
+		}
 		var addPropDiv = $("<span>add Property</span>");
 		this.editDiv.append(addPropDiv);
 		addPropDiv.click(function(){
