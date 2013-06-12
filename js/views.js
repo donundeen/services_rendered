@@ -19,15 +19,32 @@ var EntityViewEditable = Backbone.View.extend ({
 
 
 // look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
-	initialize : function(){
+	initialize : function(args){
+		console.log(args);
+
 
 		// the config element, should be hidable, default hidden
-		this.configElem = $("<div class='entityConfigDiv'></div>");
-		this.contentElem = $("<div class='entityContentDiv'></div>");
-		this.sectionsElem = $("<div class='entitySectionsDiv'></div>");
-		this.$el.append(this.contentElem);
+		if(args.configElem == null){
+			this.configElem = $("<div class='entityConfigDiv'></div>");
+			this.$el.append(this.configElem);
+		}else{
+			this.configElem = args.configElem;
+		}
+		if(args.contentElem == null){
+			this.contentElem = $("<div class='entityContentDiv'></div>");
+			this.$el.append(this.contentElem);
+		}else{
+			this.contentElem = args.contentElem;
+		}
+
+		this.sectionsElem = $("<div class='entitySectionsDiv centerPanel'  data-dojo-type='dijit/layout/TabContainer'  data-dojo-props=\"region: 'center', tabPosition: 'top'\"></div>");
+
+		/*
+<div class="centerPanel goldsearch"  id="goldsearch"
+                data-dojo-type="dijit/layout/TabContainer"
+                data-dojo-props="region: 'center', tabPosition: 'top'">
+		*/
 		this.$el.append(this.sectionsElem);
-		this.$el.append(this.configElem);
 		new EntityConfigViewEditable({model : this.model.get("config"), el : this.configElem });
 
 		// building up the sections
@@ -41,11 +58,12 @@ var EntityViewEditable = Backbone.View.extend ({
 	render : function (){
 		//this.$el.html("the html for the entity goes here");
 		var id = this.model.get("_id");
+		console.log(this.contentElem);
 		this.contentElem.html("id: " +id);
 		this.sectionsElem.empty();
 		var realthis = this;
 		this.model.get("sections").each(function(section){
-			var sectionElem = $("<div class='sectionDiv'></div>");
+			var sectionElem = $("<div class='sectionDiv' data-dojo-type='dijit/layout/ContentPane' data-dojo-props=\"title: 'Group 1'\"></div>");
 			realthis.sectionsElem.append(sectionElem);
 			new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
 		});		

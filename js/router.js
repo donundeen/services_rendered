@@ -3,6 +3,8 @@
 var Workspace = Backbone.Router.extend({
 
 	viewElem : null,
+	headerElem : null,
+	configElem : null,
 	ident : "Workspace",
 
 	routes : {
@@ -14,6 +16,8 @@ var Workspace = Backbone.Router.extend({
 
 	initialize : function(options){
 		this.viewElem = options.viewElem;
+		this.headerElem = options.headerElem;
+		this.configElem = options.configElem;
 	},
 
 	defaultAction : function(stuff){
@@ -32,7 +36,7 @@ var Workspace = Backbone.Router.extend({
 
 
 		// fake up some configs here
-		/*
+		
 		var propconf1 = new PropertyConfig({
 			name : "countryCode",
 			type : "text"
@@ -47,18 +51,21 @@ var Workspace = Backbone.Router.extend({
 			service : service,
 			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
 		});
-*/
+
 
 		var entityConfig = new EntityConfig({_id: "config/" + type,
-//											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
-											sectionConfigs : new Backbone.Collection([], {model : SectionConfig})
+											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
+									//		sectionConfigs : new Backbone.Collection([], {model : SectionConfig})
 							});
 
 
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
 //		entity.set({config: entityConfig});
 
-		var view = new EntityViewEditable({model : entity, el : this.viewElem});
+		var view = new EntityViewEditable({model : entity, 
+											el : this.viewElem, 
+											contentElem : this.headerElem,
+											configElem : this.configElem});
 		//entity.store();
 		//entityConfig.store();
 
