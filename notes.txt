@@ -1,0 +1,23 @@
+notes:
+
+the priority:
+
+- integrating data from services, displayed in a non-horrible way
+- being able to dynamically add new service calls to the page, from the interface
+- caching the data
+- integrating the data with search, semweb, etc.
+- different types of outputs and views
+
+
+so, for #1:
+- pick a layout framework that lets you JGID, so you can move on to the integration framework
+- keep the layout stuff in the views, so you can change it later. no big whoop.
+- need a framework that lets you:
+-- add sections and sub-sections
+-- editable forms that look good
+-- drop-down menus and other types of menus.
+-- use of icons
+
+give dijit a shot. 
+
+

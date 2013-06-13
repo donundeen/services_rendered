@@ -17,7 +17,6 @@ var EntityViewEditable = Backbone.View.extend ({
 	contentElem: null,
 	sectionsElem: null,
 
-
 // look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
 	initialize : function(args){
 		console.log(args);
@@ -61,12 +60,15 @@ var EntityViewEditable = Backbone.View.extend ({
 		console.log(this.contentElem);
 		this.contentElem.html("id: " +id);
 		this.sectionsElem.empty();
+		
 		var realthis = this;
 		this.model.get("sections").each(function(section){
+			console.log("adding section");
 			var sectionElem = $("<div class='sectionDiv' data-dojo-type='dijit/layout/ContentPane' data-dojo-props=\"title: 'Group 1'\"></div>");
 			realthis.sectionsElem.append(sectionElem);
 			new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
-		});		
+		});
+
 		return this;
 	},
 
