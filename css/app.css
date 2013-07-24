@@ -25,3 +25,25 @@ div {
     width: 550px;
     height: 550px;
 }
+
+  html, body {
+    background: #666;
+    width:    100%;
+    height:   100%;         
+    padding:  0;
+    margin:   0;
+    overflow: auto; /* when page gets too small for container min-width/height */
+  }
+  #container {
+    background: #999;
+    min-height: 300px;
+    min-width:  600px;
+    position: absolute;
+    top:    50px; /* margins in pixels */
+    bottom:   50px; /* could also use a percent */
+    left:   50px;
+    right:    50px;
+  }
+  .pane {
+    display:  none; /* will appear when layout inits */
+  }

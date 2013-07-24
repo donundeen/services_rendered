@@ -16,11 +16,11 @@ var EntityViewEditable = Backbone.View.extend ({
 	configElem : null,
 	contentElem: null,
 	sectionsElem: null,
+	sectionsTabs: null,
 
 // look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
 	initialize : function(args){
 		console.log(args);
-
 
 		// the config element, should be hidable, default hidden
 		if(args.configElem == null){
@@ -30,19 +30,18 @@ var EntityViewEditable = Backbone.View.extend ({
 			this.configElem = args.configElem;
 		}
 		if(args.contentElem == null){
-			this.contentElem = $("<div class='entityContentDiv'></div>");
+			this.contentElem = $("<div class='entityContentDiv header-footer  ui-state-default ui-corner-all'>header div</div>");
 			this.$el.append(this.contentElem);
 		}else{
 			this.contentElem = args.contentElem;
 		}
 
-		this.sectionsElem = $("<div class='entitySectionsDiv centerPanel'  data-dojo-type='dijit/layout/TabContainer'  data-dojo-props=\"region: 'center', tabPosition: 'top'\"></div>");
 
-		/*
-<div class="centerPanel goldsearch"  id="goldsearch"
-                data-dojo-type="dijit/layout/TabContainer"
-                data-dojo-props="region: 'center', tabPosition: 'top'">
-		*/
+		// build it with jquery ui layout instead of dojo
+		this.sectionsElem = $("<DIV class='ui-layout-content ui-widget-content ui-corner-bottom entitySectionsDiv centerPanel'  id='sectionsElem' style=\"border-top: 0; padding-bottom: 1em;\">");
+		this.sectionsTabs = $("<UL ></UL>");
+
+		this.$el.append(this.sectionsTabs);
 		this.$el.append(this.sectionsElem);
 		new EntityConfigViewEditable({model : this.model.get("config"), el : this.configElem });
 
@@ -55,19 +54,53 @@ var EntityViewEditable = Backbone.View.extend ({
 	},
 
 	render : function (){
+		console.log("in render");
 		//this.$el.html("the html for the entity goes here");
 		var id = this.model.get("_id");
 		console.log(this.contentElem);
 		this.contentElem.html("id: " +id);
+		this.sectionsTabs.empty();
 		this.sectionsElem.empty();
-		
 		var realthis = this;
+		var i = 0;
 		this.model.get("sections").each(function(section){
+			i++;
 			console.log("adding section");
-			var sectionElem = $("<div class='sectionDiv' data-dojo-type='dijit/layout/ContentPane' data-dojo-props=\"title: 'Group 1'\"></div>");
+			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
+			var sectionElem = $("<div id='tab"+i+"'>stuff "+i+"</div>");
+			realthis.sectionsTabs.append(sectionTab);
 			realthis.sectionsElem.append(sectionElem);
-			new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
+		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
 		});
+
+		this.model.get("sections").each(function(section){
+			i++;
+			console.log("adding section");
+			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
+			var sectionElem = $("<div id='tab"+i+"'>stuff "+i+"</div>");
+			realthis.sectionsTabs.append(sectionTab);
+			realthis.sectionsElem.append(sectionElem);
+		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
+		});
+
+
+		this.$el.tabs();
+
+// the two above this work, but not those below the call to tabs()   ???
+
+//		$('#container').layout();
+		this.model.get("sections").each(function(section){
+			i++;
+			console.log("adding section");
+			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
+			var sectionElem = $("<div id='tab"+i+"'>stuff "+i+"</div>");
+			realthis.sectionsTabs.append(sectionTab);
+			realthis.sectionsElem.append(sectionElem);
+		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
+		});
+
+		this.$el.tabs();
+
 
 		return this;
 	},
