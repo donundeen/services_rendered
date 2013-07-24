@@ -73,33 +73,13 @@ var EntityViewEditable = Backbone.View.extend ({
 		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
 		});
 
-		this.model.get("sections").each(function(section){
-			i++;
-			console.log("adding section");
-			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
-			var sectionElem = $("<div id='tab"+i+"'>stuff "+i+"</div>");
-			realthis.sectionsTabs.append(sectionTab);
-			realthis.sectionsElem.append(sectionElem);
-		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
-		});
+
 
 
 		this.$el.tabs();
+		this.$el.tabs("refresh");
 
-// the two above this work, but not those below the call to tabs()   ???
 
-//		$('#container').layout();
-		this.model.get("sections").each(function(section){
-			i++;
-			console.log("adding section");
-			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
-			var sectionElem = $("<div id='tab"+i+"'>stuff "+i+"</div>");
-			realthis.sectionsTabs.append(sectionTab);
-			realthis.sectionsElem.append(sectionElem);
-		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
-		});
-
-		this.$el.tabs();
 
 
 		return this;
