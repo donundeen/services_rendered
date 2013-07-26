@@ -127,11 +127,14 @@ var EntityConfig = CouchModel.extend({
 	//	"foo" : "bar",
 		sectionConfigs :  new Backbone.Collection([], {model : SectionConfig}),
 		ident : "EntityConfig",
+		rand : null
 	},
 
 	initialize : function(){
 		//	this.load();
 		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
+		//this.set("sectionConfigs", new Backbone.Collection([], {model : SectionConfig}));
+		this.set("rand", Math.random());
 	},
 
 
@@ -166,6 +169,8 @@ var Entity = CouchModel.extend ({
 	//	this.load(arguments[0]);
 		var realthis = this;
 
+		//this.set("sections", new Backbone.Collection([], {model : Section}));
+
 		// need to attach a listener to the config, so when changes happen to the config, this model is notified.
 		this.listenTo(this.get("config"), "change", this.configChanged);
 		this.listenTo(this.get("config").get("sectionConfigs"), "add", this.sectionConfigAdded);
@@ -187,6 +192,8 @@ var Entity = CouchModel.extend ({
 
 	sectionConfigAdded : function(sectionConfig, entireList){
 		// for when sections are added
+		console.log("a sectionconfig was added");
+		console.log(sectionConfig);
 		this.addSection(sectionConfig);
 	},
 
@@ -209,12 +216,12 @@ var SectionConfig = CouchModel.extend({
 	},
 
 	initialize : function(){
-		//	this.load();	
+		//	this.load();			
+	//	this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
 		this.set("rand", Math.random(1000));
 	},
 
 	addPropertyConfig : function(){
-		console.log("adding property Config to " + this.get("rand"));
 		// what details do we need for a new, unformed propertyConfig?
 		var propertyConfig = new PropertyConfig({});
 		this.get("propertyConfigs").add(propertyConfig);
@@ -240,18 +247,20 @@ var Section = CouchModel.extend ({
 		var realthis = this;
 		//	this.load();		
 
+		// if i don't set the value here, it seems to get the properties of whatever the other section is. strange.
+		this.set("properties", new Backbone.Collection([], {model : Property}));
+
 		this.set("rand", Math.random(100));
 		// need to attach listener to the config, so that when the config changes, this class is notified.
 		this.listenTo(this.get("config"), "change", this.configChanged);
 		this.listenTo(this.get("config").get("propertyConfigs"), "add", this.propertyConfigAdded);
 
-		console.log("initializing section, rand is "+this.get("rand"));
-
-
 		// load properties, by looking at this.configs propertyConfigs
 		this.get("config").get("propertyConfigs").each(function(propertyConfig){
 			realthis.addProperty(propertyConfig);
 		});		
+
+
 	},
 
 	configChanged : function(var1){
@@ -264,7 +273,6 @@ var Section = CouchModel.extend ({
 
 	addProperty : function(propertyConfig){
 		var property = new Property({config : propertyConfig, parent: this});
-		console.log("adding property to section " + this.get("rand"));
 		this.get("properties").add(property);
 	}
 });
@@ -278,8 +286,6 @@ var PropertyConfig = CouchModel.extend ({
 	},
 
 	initialize : function(){
-		console.log("new propertyconfig");
-
 		this.set("rand", Math.random(1000));
 		//this.load();
 	}
@@ -296,9 +302,7 @@ var Property = CouchModel.extend ({
 	},
 
 	initialize : function(){
-				this.set("rand", Math.random(1000));
-
-		console.log("new proprty");
+		this.set("rand", Math.random(1000));
 		this.set("value", "default " + Math.random()); // bug: properties are being re-used in each section this value is the same in all sections
 	//	this.load();
 	}

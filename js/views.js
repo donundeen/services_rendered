@@ -36,7 +36,6 @@ var EntityViewEditable = Backbone.View.extend ({
 			this.contentElem = args.contentElem;
 		}
 
-
 		// build it with jquery ui layout instead of dojo
 		this.sectionsElem = $("<DIV class='ui-layout-content ui-widget-content ui-corner-bottom entitySectionsDiv centerPanel'  id='sectionsElem' style=\"border-top: 0; padding-bottom: 1em;\">");
 		this.sectionsTabs = $("<UL ></UL>");
@@ -54,7 +53,6 @@ var EntityViewEditable = Backbone.View.extend ({
 	},
 
 	render : function (){
-		console.log("in render");
 		//this.$el.html("the html for the entity goes here");
 		var id = this.model.get("_id");
 		console.log(this.contentElem);
@@ -117,9 +115,6 @@ var SectionViewEditable = Backbone.View.extend({
 		this.propertiesElem.empty();
 		this.model.get("properties").each(function(property){
 			var propElem = $("<div class='propertyDiv'>section:"+realthis.model.get("rand")+"</div>");
-			console.log("showing property, section value " + realthis.model.get("rand"));
-			console.log("showing property, sectionconfig value " + realthis.model.get("config").get("rand"));
-			console.log("property value " + property.get("rand"));
 			realthis.propertiesElem.append(propElem);			
 			new PropertyViewEditable({model : property, el : propElem, parent : realthis});
 		});
@@ -156,13 +151,12 @@ var EntityConfigViewEditable = Backbone.View.extend ({
 		var addSectionDiv = $("<span>add Section</span>");
 		this.editDiv.append(addSectionDiv);
 		addSectionDiv.click(function(){
-			console.log("adding sectionConfig");
 			realthis.model.addSectionConfig();
 		});
 
 
 		configForm.change(function(changed){
-			console.log(changed.target.name);
+//			console.log(changed.target.name);
 			realthis.model.set(changed.target.name, changed.target.value);
 		});
 
@@ -220,7 +214,7 @@ var SectionConfigViewEditable = Backbone.View.extend ({
 
 
 		configForm.change(function(changed){
-			console.log(changed.target.name);
+		//	console.log(changed.target.name);
 			realthis.model.set(changed.target.name, changed.target.value);
 		});
 
@@ -279,7 +273,6 @@ var PropertyViewEditable = Backbone.View.extend ({
 
 	modelChanged : function(){
 		this.render();
-
 	}
 
 });
@@ -305,7 +298,7 @@ var PropertyConfigViewEditable = Backbone.View.extend ({
 
 		var realthis = this;
 		configForm.change(function(changed){
-			console.log(changed.target.name);
+		//	console.log(changed.target.name);
 			realthis.model.set(changed.target.name, changed.target.value);
 		});
 
@@ -316,11 +309,7 @@ var PropertyConfigViewEditable = Backbone.View.extend ({
 		this.$el.append(configSpan);
 		this.$el.append(this.editDiv);
 
-
 		this.listenTo(this.model, "change", this.modelChanged);
-		this.render();
-
-
 		this.render();
 	},
 
@@ -328,8 +317,6 @@ var PropertyConfigViewEditable = Backbone.View.extend ({
 		//this.$el.html("the html for the propertyconfig goes here");
 
 		return this;
-
-
 	},
 
 	modelChanged : function(){
