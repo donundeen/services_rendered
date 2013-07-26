@@ -58,12 +58,9 @@ var Workspace = Backbone.Router.extend({
 
 
 		var entityConfig = new EntityConfig({_id: "config/" + type
-//											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
-									//		sectionConfigs : new Backbone.Collection([], {model : SectionConfig})
 							});
 
 		entityConfig.addSectionConfig(secconf1);
-		entityConfig.addSectionConfig();
 
 
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});

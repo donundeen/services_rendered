@@ -170,6 +170,8 @@ var Entity = CouchModel.extend ({
 
 	initialize : function(){
 	//	this.load(arguments[0]);
+		// now when this loads, we might need to load/save from db somehow.
+
 		var realthis = this;
 
 		this.set("sections", new Backbone.Collection([], {model : Section}));
@@ -194,8 +196,6 @@ var Entity = CouchModel.extend ({
 
 	sectionConfigAdded : function(sectionConfig, entireList){
 		// for when sections are added
-		console.log("sectionconfig added");
-		console.log(sectionConfig);
 		this.addSection(sectionConfig);
 	},
 
@@ -221,8 +221,6 @@ var SectionConfig = CouchModel.extend({
 		//	this.load();			
 		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
 		this.set("rand", Math.random(1000));
-		console.log("sectionConfig.initialize");
-		console.log(this);
 	},
 
 	addPropertyConfig : function(){
