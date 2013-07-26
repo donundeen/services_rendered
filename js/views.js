@@ -67,20 +67,14 @@ var EntityViewEditable = Backbone.View.extend ({
 			i++;
 			console.log("adding section");
 			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
-			var sectionElem = $("<div id='tab"+i+"'>stuff "+i+"</div>");
+			var sectionElem = $("<div id='tab"+i+"'>section "+i+"</div>");
 			realthis.sectionsTabs.append(sectionTab);
 			realthis.sectionsElem.append(sectionElem);
-		//	new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
+			new SectionViewEditable({model : section, el : sectionElem, parent : realthis});
 		});
-
-
-
 
 		this.$el.tabs();
 		this.$el.tabs("refresh");
-
-
-
 
 		return this;
 	},
@@ -122,7 +116,10 @@ var SectionViewEditable = Backbone.View.extend({
 		var realthis = this;
 		this.propertiesElem.empty();
 		this.model.get("properties").each(function(property){
-			var propElem = $("<div class='properyDiv'>"+Math.random(100)+"</div>");
+			var propElem = $("<div class='propertyDiv'>section:"+realthis.model.get("rand")+"</div>");
+			console.log("showing property, section value " + realthis.model.get("rand"));
+			console.log("showing property, sectionconfig value " + realthis.model.get("config").get("rand"));
+			console.log("property value " + property.get("rand"));
 			realthis.propertiesElem.append(propElem);			
 			new PropertyViewEditable({model : property, el : propElem, parent : realthis});
 		});
@@ -170,7 +167,6 @@ var EntityConfigViewEditable = Backbone.View.extend ({
 		});
 
 		this.editDiv.hide();
-		var realthis = this;
 		configSpan.click(function(){realthis.editDiv.toggle();});
 
 		this.$el.append(configSpan);
@@ -229,7 +225,6 @@ var SectionConfigViewEditable = Backbone.View.extend ({
 		});
 
 		this.editDiv.hide();
-		var realthis = this;
 		configSpan.click(function(){realthis.editDiv.toggle();});
 
 		this.$el.append(configSpan);
