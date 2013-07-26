@@ -138,7 +138,7 @@ var EntityConfig = CouchModel.extend({
 	},
 
 
-	addSectionConfig : function(){
+	addSectionConfig : function(sectionConfig){
 		// what do we need to add a new, undescribed sectionConfig?
 
 		// add the empty setionConfig
@@ -146,7 +146,10 @@ var EntityConfig = CouchModel.extend({
 		// then let entities that use this config know that they need to add an entity with that config
 
 		// therefore, need entities to be able to listen to 'addSectionConfig' events in thier config models
-		this.get("sectionConfigs").add(new SectionConfig({}));
+		if(!sectionConfig){
+			sectionConfig = new SectionConfig({});
+		}
+		this.get("sectionConfigs").add(sectionConfig);
 		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
 
 	}
@@ -169,7 +172,7 @@ var Entity = CouchModel.extend ({
 	//	this.load(arguments[0]);
 		var realthis = this;
 
-		//this.set("sections", new Backbone.Collection([], {model : Section}));
+		this.set("sections", new Backbone.Collection([], {model : Section}));
 
 		// need to attach a listener to the config, so when changes happen to the config, this model is notified.
 		this.listenTo(this.get("config"), "change", this.configChanged);
@@ -177,7 +180,6 @@ var Entity = CouchModel.extend ({
 
 		// load sections here, by looking at this.config to see what sections get loaded..
 		this.get("config").get("sectionConfigs").each(function(sectionConfig){
-			console.log("Adding sectionCofnig" + sectionConfig.get("rand"));
 			realthis.addSection(sectionConfig);
 		});
 	},
@@ -192,7 +194,7 @@ var Entity = CouchModel.extend ({
 
 	sectionConfigAdded : function(sectionConfig, entireList){
 		// for when sections are added
-		console.log("a sectionconfig was added");
+		console.log("sectionconfig added");
 		console.log(sectionConfig);
 		this.addSection(sectionConfig);
 	},
@@ -217,8 +219,10 @@ var SectionConfig = CouchModel.extend({
 
 	initialize : function(){
 		//	this.load();			
-	//	this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
+		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
 		this.set("rand", Math.random(1000));
+		console.log("sectionConfig.initialize");
+		console.log(this);
 	},
 
 	addPropertyConfig : function(){
@@ -259,8 +263,6 @@ var Section = CouchModel.extend ({
 		this.get("config").get("propertyConfigs").each(function(propertyConfig){
 			realthis.addProperty(propertyConfig);
 		});		
-
-
 	},
 
 	configChanged : function(var1){

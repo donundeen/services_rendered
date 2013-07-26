@@ -20,7 +20,7 @@ var EntityViewEditable = Backbone.View.extend ({
 
 // look at this: http://stackoverflow.com/questions/6353607/backbone-js-structuring-nested-views-and-models
 	initialize : function(args){
-		console.log(args);
+//		console.log(args);
 
 		// the config element, should be hidable, default hidden
 		if(args.configElem == null){
@@ -55,7 +55,6 @@ var EntityViewEditable = Backbone.View.extend ({
 	render : function (){
 		//this.$el.html("the html for the entity goes here");
 		var id = this.model.get("_id");
-		console.log(this.contentElem);
 		this.contentElem.html("id: " +id);
 		this.sectionsTabs.empty();
 		this.sectionsElem.empty();
@@ -63,7 +62,6 @@ var EntityViewEditable = Backbone.View.extend ({
 		var i = 0;
 		this.model.get("sections").each(function(section){
 			i++;
-			console.log("adding section");
 			var sectionTab = $("<li><a href='#tab"+i+"'><span>Tab "+i+"</span></li>");
 			var sectionElem = $("<div id='tab"+i+"'>section "+i+"</div>");
 			realthis.sectionsTabs.append(sectionTab);
@@ -267,6 +265,7 @@ var PropertyViewEditable = Backbone.View.extend ({
 
 		var msg = this.model.get("config").get("name") + " :  ";
 		msg += this.model.get("value");
+		msg += "config : " + this.model.get("config").get("rand");
 		this.contentElem.html("property : " + msg);
 		return this;
 	},

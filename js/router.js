@@ -49,18 +49,27 @@ var Workspace = Backbone.Router.extend({
 		var secconf1 = new SectionConfig({
 			name : "geography",
 			service : service,
-			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
+//			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
 		});
 
+		secconf1.addPropertyConfig(propconf1);
+		secconf1.addPropertyConfig(propconf2);
 
-		var entityConfig = new EntityConfig({_id: "config/" + type,
-											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
+
+
+		var entityConfig = new EntityConfig({_id: "config/" + type
+//											sectionConfigs : new Backbone.Collection([secconf1], {model : SectionConfig})
 									//		sectionConfigs : new Backbone.Collection([], {model : SectionConfig})
 							});
+
+		entityConfig.addSectionConfig(secconf1);
+		entityConfig.addSectionConfig();
 
 
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
 //		entity.set({config: entityConfig});
+
+//		entity.addSection(secconf1);
 
 		var view = new EntityViewEditable({model : entity, 
 											el : this.viewElem, 
