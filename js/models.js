@@ -34,6 +34,17 @@ Property
 */
 
 
+Backbone.sync = function(method, model){
+	console.log("started sync");
+	console.log(method + ": " );
+	console.log(model);
+	console.log("did dync")
+  	model.id = 1;
+
+  	// so, I think save stuff happens here?
+};
+
+
 var CouchModel = Backbone.Model.extend({
 
 
@@ -50,8 +61,10 @@ var CouchModel = Backbone.Model.extend({
 	connect : function (){
 
 		if(this.serviceRunning){
-			console.log("trying to connect");
+			console.log("trying to connect???");
 			this.db = new CouchDB("http://localhost:8088/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
+		console.log("connected?");
+		console.log(this.db);
 		}
 	},
 
@@ -62,6 +75,7 @@ var CouchModel = Backbone.Model.extend({
 		if(this.db == null){
 			this.connect();
 		}
+		console.log("tring to store");
 		if(this.serviceRunning){
 			var doc = this.clone();//attributes;
 				
@@ -88,6 +102,7 @@ var CouchModel = Backbone.Model.extend({
 		}		
 		if(this.serviceRunning){
 			try{
+				console.log("trying to load");
 			    var storeddoc = this.db.open(this.get("_id"));
 			    this.set(storeddoc);
 			    this.set(overrides);
@@ -166,7 +181,7 @@ var Entity = CouchModel.extend ({
 		title : "untitled"
 	},
 
-	dontSave : ["sections", "config"],
+	dontSave : ["sections"] ,//["sections", "config"],
 
 	initialize : function(){
 	//	this.load(arguments[0]);

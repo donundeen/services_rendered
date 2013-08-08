@@ -33,6 +33,7 @@ var Workspace = Backbone.Router.extend({
 		var service = new Service({
 			uri : "http://someuri"
 		});
+console.log("57");
 
 
 		// fake up some configs here
@@ -56,17 +57,19 @@ var Workspace = Backbone.Router.extend({
 		secconf1.addPropertyConfig(propconf2);
 
 
-
 		var entityConfig = new EntityConfig({_id: "config/" + type
 							});
 
 		entityConfig.addSectionConfig(secconf1);
 
-
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
+//		var entity = new Entity({_id: "entity/"+type+"/"+id });
+		entity.save();
 //		entity.set({config: entityConfig});
 
 //		entity.addSection(secconf1);
+
+//		entity.store();
 
 		var view = new EntityViewEditable({model : entity, 
 											el : this.viewElem, 
