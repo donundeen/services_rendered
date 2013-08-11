@@ -33,8 +33,12 @@ var Workspace = Backbone.Router.extend({
 		var service = new Service({
 			uri : "http://someuri"
 		});
-console.log("57");
 
+
+		// this can call the factory method for an entity, returning the entity object. 
+		var result = Entity.getInstance("thing");
+
+		console.log(result);
 
 		// fake up some configs here
 		
@@ -60,11 +64,17 @@ console.log("57");
 		var entityConfig = new EntityConfig({_id: "config/" + type
 							});
 
+		//entityConfig.load();
+
 		entityConfig.addSectionConfig(secconf1);
 
+		//entityConfig.store();
+		console.log("67");
+
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
+		console.log("70");
 //		var entity = new Entity({_id: "entity/"+type+"/"+id });
-		entity.save();
+		//entity.store();
 //		entity.set({config: entityConfig});
 
 //		entity.addSection(secconf1);

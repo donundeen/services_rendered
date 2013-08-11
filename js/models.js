@@ -31,6 +31,16 @@ Property
 - can render forms for editing itself
 
 
+the big config/entity question:
+- configs apply to ALL entities of that type
+- what if the config changes, and then the object is loaded?
+- what if the config removes a sectionConfig - does that section go away from the object?
+-- let's say yes
+- what if a config has had a sectionconfig added
+-- how does the entity match up it's saved sections, to the sections in the sectionConfig?
+-- need an identifier for each section, and each sectionconfig
+
+
 */
 
 
@@ -41,7 +51,9 @@ Backbone.sync = function(method, model){
 	console.log("did dync")
   	model.id = 1;
 
-  	// so, I think save stuff happens here?
+  	// so, I think save stuff happens here? or, put save method in individual models, or in CouchModel
+
+  	// need to figure out how to make it work with couch, if we want to use this. just use our own store method for now.
 };
 
 
@@ -58,6 +70,9 @@ var CouchModel = Backbone.Model.extend({
 		ident : "CouchModel",
 	},
 
+	idAttribute : "_id",
+
+
 	connect : function (){
 
 		if(this.serviceRunning){
@@ -71,7 +86,9 @@ var CouchModel = Backbone.Model.extend({
 
 
 
-	store : function(){    
+	store : function(){   
+
+		this.preStore(); 
 		if(this.db == null){
 			this.connect();
 		}
@@ -85,6 +102,10 @@ var CouchModel = Backbone.Model.extend({
 					doc.unset(value);
 				}
 			});
+
+			console.log("trying to save");
+			console.log(doc.attributes);
+
 			try{
 			    var saveresult = this.db.save(doc.attributes);
 			}catch(e){
@@ -92,8 +113,17 @@ var CouchModel = Backbone.Model.extend({
 			    console.log(e);  
 			}
 		}
+		this.postStore();
 	},
 
+	postStore : function (){
+
+
+	},
+
+	preStore : function(){
+
+	},
 
 	load: function(overrides){
 
@@ -102,16 +132,25 @@ var CouchModel = Backbone.Model.extend({
 		}		
 		if(this.serviceRunning){
 			try{
-				console.log("trying to load");
+				console.log("trying to load" + this.get("_id"));
 			    var storeddoc = this.db.open(this.get("_id"));
+
+			    console.log("loaded");
 			    this.set(storeddoc);
 			    this.set(overrides);
+			    console.log("loaded 2");
 			}catch(e){
 			    console.log("retrieval error");
 			    console.log(e); 
 			}
 		}
+		this.postLoad();
+	},
+
+	postLoad : function(){
+
 	}
+
 });
 
 
@@ -144,6 +183,33 @@ var EntityConfig = CouchModel.extend({
 		ident : "EntityConfig",
 		rand : null
 	},
+
+	dontSave : ["sectionConfigs"] ,//["sections", "config"],
+
+	preStore : function (){
+		realthis = this;
+		var sectionIDs = [];
+		this.get("sectionConfigs").each(function(sectionConfig)){
+			sectionIDs.push(sectionConfig.id);
+		}
+		this.set("sectionConfigIDs", sectionIDs);
+	},
+
+	postStore : function(){
+		// store the sectionConfigs
+		this.get("sectionConfigs").each(function(sectionConfig)){
+			sectionConfig.store();
+		}
+	},
+
+	postLoad : function(){
+		// load the sectionConfigID, and load the section for that ID
+		var realthis = this;
+		this.set("sectionConfigIDs").each(function(sectionID)){
+			var sectionConfig = SectionConfig.getInstance(sectionID);
+			realthis.addSectionConfig(sectionConfig);
+		});
+	}
 
 	initialize : function(){
 		//	this.load();
@@ -181,7 +247,8 @@ var Entity = CouchModel.extend ({
 		title : "untitled"
 	},
 
-	dontSave : ["sections"] ,//["sections", "config"],
+
+	dontSave : ["sections", "config"] ,//["sections", "config"],
 
 	initialize : function(){
 	//	this.load(arguments[0]);
@@ -189,16 +256,11 @@ var Entity = CouchModel.extend ({
 
 		var realthis = this;
 
+		// also, if the entity has sections NOT defined in the config, then remove them.
+	},
+
+	resetSections : function(){
 		this.set("sections", new Backbone.Collection([], {model : Section}));
-
-		// need to attach a listener to the config, so when changes happen to the config, this model is notified.
-		this.listenTo(this.get("config"), "change", this.configChanged);
-		this.listenTo(this.get("config").get("sectionConfigs"), "add", this.sectionConfigAdded);
-
-		// load sections here, by looking at this.config to see what sections get loaded..
-		this.get("config").get("sectionConfigs").each(function(sectionConfig){
-			realthis.addSection(sectionConfig);
-		});
 	},
 
 	doThing : function(){
@@ -209,6 +271,42 @@ var Entity = CouchModel.extend ({
 		// for when config attributes change
 	},
 
+	setConfig : function(config){
+		this.set("config", config);
+		// need to attach a listener to the config, so when changes happen to the config, this model is notified.
+		this.listenTo(this.get("config"), "change", this.configChanged);
+		this.listenTo(this.get("config").get("sectionConfigs"), "add", this.sectionConfigAdded);
+	},
+
+	reconcileConfig : function(){
+		// add sections that are in config but not entity
+		// load sections here, by looking at this.config to see what sections get loaded..
+		var realthis = this;
+		this.get("config").get("sectionConfigs").each(function(sectionConfig){
+			// need to determine what sections are already in the object
+			// if the section is already in the entity, don't create it (how to determine?)
+			realthis.addSection(sectionConfig);
+		});
+
+		// remove sections that are in entity but not config
+
+		this.get("sections").each(function(entitySection)){
+			outerSectionConfig = entitySection.get("config");
+			var found = false;
+			realthis.get("config").get("sectionConfigs").each(function(sectionConfig){
+				if(sectionConfig == outerSectionConfig){
+					found = true;
+					return false;
+				}
+			});
+			if(found == false){
+				// remove the section
+				realthis.removeSection(entitySection);
+			}
+		});					
+
+	},
+
 	sectionConfigAdded : function(sectionConfig, entireList){
 		// for when sections are added
 		this.addSection(sectionConfig);
@@ -217,11 +315,61 @@ var Entity = CouchModel.extend ({
 	addSection : function(sectionConfig){
 		// what do we need when we add a new section?
 		// should already have a config to go with it, even if that config doesn't have any details
-		var section = new Section({config : sectionConfig, parent: this});
+
+		// make sure sectionConfig isn't already in use in a section
+		var found = false;
+		this.get("config").set("sectionConfigs").each(function(innerSectionConfig)){
+			if(innerSectionConfig == sectionConfig){
+				console.log("setionConfig already in this entity");
+				// if it's already in there, then don't load it again.
+				found = true;
+				return false;
+			}
+		});
+		if(found){
+			return;
+		}
+
+		// otherwise, add the section
+		var section = new Section({config : sectionConfig});//, parent: this});
+		// here, section.cid will exist, and be unique (for this collection, at least);
 		this.get("sections").add(section);
+	}
+
+	removeSection : function(sectionID){
+		this.get("sections").remove(section);
 	}
 });
 
+
+// this can be the factory method for creating an object
+Entity.getInstance = (function(){
+	return function(id, type){
+		// this should load the appropriate stuff from couch, I think.
+
+		// first, load the config object
+		// load the nested objects in that config
+
+		// then load the entity, 
+		// then load the entities' setions, 
+		// then and add the config object to it, which should remove any unneeded sections, add any new ones.
+		// load the nested objects in that config
+
+		// then, do any initialization on the object
+		console.log("in factory");
+
+		var entityConfig = EntityConfig.getInstance(type);
+
+		var entity = new Entity();
+
+		// load the entities sections?
+
+		entity.setConfig(entityConfig);
+
+		entity.reconcileConfig();
+		return "hey";
+	};
+})();
 
 var SectionConfig = CouchModel.extend({
 
@@ -247,6 +395,14 @@ var SectionConfig = CouchModel.extend({
 	}
 });
 
+SectionConfig.getInstance = (function(){
+	return function(id){
+		var sectionConfig = new SectionConfig({_id : id});
+		sectionConfig.load();
+
+	};
+
+})();
 
 var Section = CouchModel.extend ({
 
@@ -287,7 +443,7 @@ var Section = CouchModel.extend ({
 	},
 
 	addProperty : function(propertyConfig){
-		var property = new Property({config : propertyConfig, parent: this});
+		var property = new Property({config : propertyConfig });//, parent: this});
 		this.get("properties").add(property);
 	}
 });
