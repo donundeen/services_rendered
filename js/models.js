@@ -89,22 +89,29 @@ var CouchModel = Backbone.Model.extend({
 	store : function(){   
 
 		this.preStore(); 
+		var realthis = this;
 		if(this.db == null){
 			this.connect();
 		}
-		console.log("tring to store");
 		if(this.serviceRunning){
 			var doc = this.clone();//attributes;
+
+			$(this.nestedCollections).each(function(index, value){
+				var collection = doc.get(value);
+				var collectionids = [];
+				collection.each(function(item){
+					item.store();
+					collectionids.push(item.id);
+				});
+				doc.set(value, collectionids);
+
+			});
 				
 			$(this.dontSave).each(function(index, value){
 				if(doc.has(value)){
-					console.log("unsetting " + value);
 					doc.unset(value);
 				}
 			});
-
-			console.log("trying to save");
-			console.log(doc.attributes);
 
 			try{
 			    var saveresult = this.db.save(doc.attributes);
@@ -132,11 +139,25 @@ var CouchModel = Backbone.Model.extend({
 		}		
 		if(this.serviceRunning){
 			try{
-				console.log("trying to load" + this.get("_id"));
+				realthis = this;
+				console.log("trying to load :: " + this.get("_id"));
 			    var storeddoc = this.db.open(this.get("_id"));
+			    console.log("did it work?");
+			    console.log(storedoc);
+			    this.set(storeddoc);
+
+				$(this.nestedCollections).each(function(index, value){
+					var collectionids = realthis.get(value);
+					var collection = new Backbone.Collection([], {model : this.nestedCollectionModels[value]});
+					$(collectionids).each(function(item_id){
+						item = new this.nestedCollectionModels[value]({_id : item_id});
+						item.load();
+						collection.add(item);
+					});
+					this.set(value, collection);
+				});
 
 			    console.log("loaded");
-			    this.set(storeddoc);
 			    this.set(overrides);
 			    console.log("loaded 2");
 			}catch(e){
@@ -184,32 +205,12 @@ var EntityConfig = CouchModel.extend({
 		rand : null
 	},
 
-	dontSave : ["sectionConfigs"] ,//["sections", "config"],
+//	dontSave : ["sectionConfigs"] ,//["sections", "config"],
 
-	preStore : function (){
-		realthis = this;
-		var sectionIDs = [];
-		this.get("sectionConfigs").each(function(sectionConfig)){
-			sectionIDs.push(sectionConfig.id);
-		}
-		this.set("sectionConfigIDs", sectionIDs);
+	nestedCollections : ["sectionConfigs"],
+	nestedCollectionModels : {
+		"sectionConfigs" : SectionConfig
 	},
-
-	postStore : function(){
-		// store the sectionConfigs
-		this.get("sectionConfigs").each(function(sectionConfig)){
-			sectionConfig.store();
-		}
-	},
-
-	postLoad : function(){
-		// load the sectionConfigID, and load the section for that ID
-		var realthis = this;
-		this.set("sectionConfigIDs").each(function(sectionID)){
-			var sectionConfig = SectionConfig.getInstance(sectionID);
-			realthis.addSectionConfig(sectionConfig);
-		});
-	}
 
 	initialize : function(){
 		//	this.load();
@@ -217,7 +218,6 @@ var EntityConfig = CouchModel.extend({
 		//this.set("sectionConfigs", new Backbone.Collection([], {model : SectionConfig}));
 		this.set("rand", Math.random());
 	},
-
 
 	addSectionConfig : function(sectionConfig){
 		// what do we need to add a new, undescribed sectionConfig?
@@ -230,13 +230,26 @@ var EntityConfig = CouchModel.extend({
 		if(!sectionConfig){
 			sectionConfig = new SectionConfig({});
 		}
+		if(!sectionConfig.id){
+			var newid = this.id + "/" + sectionConfig.cid;
+			sectionConfig.set("_id", newid);
+		}
 		this.get("sectionConfigs").add(sectionConfig);
 		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
 
 	}
 });
 
+// this can be the factory method for creating an object
+EntityConfig.getInstance = (function(){
+	return function(id, type){
+		var entityConfigID = "config/" + type;
+		var entityConfig = new Entity({_id :  entityConfigID});
+		entityConfig.load();
 
+		return entityConfig;
+	};
+})();
 
 var Entity = CouchModel.extend ({
 
@@ -285,12 +298,13 @@ var Entity = CouchModel.extend ({
 		this.get("config").get("sectionConfigs").each(function(sectionConfig){
 			// need to determine what sections are already in the object
 			// if the section is already in the entity, don't create it (how to determine?)
+			console.log("adding section");
 			realthis.addSection(sectionConfig);
 		});
 
 		// remove sections that are in entity but not config
 
-		this.get("sections").each(function(entitySection)){
+		this.get("sections").each(function(entitySection){
 			outerSectionConfig = entitySection.get("config");
 			var found = false;
 			realthis.get("config").get("sectionConfigs").each(function(sectionConfig){
@@ -301,6 +315,7 @@ var Entity = CouchModel.extend ({
 			});
 			if(found == false){
 				// remove the section
+				console.log("removing section");
 				realthis.removeSection(entitySection);
 			}
 		});					
@@ -317,8 +332,9 @@ var Entity = CouchModel.extend ({
 		// should already have a config to go with it, even if that config doesn't have any details
 
 		// make sure sectionConfig isn't already in use in a section
+		/*
 		var found = false;
-		this.get("config").set("sectionConfigs").each(function(innerSectionConfig)){
+		this.get("config").get("sectionConfigs").each(function(innerSectionConfig){
 			if(innerSectionConfig == sectionConfig){
 				console.log("setionConfig already in this entity");
 				// if it's already in there, then don't load it again.
@@ -329,12 +345,12 @@ var Entity = CouchModel.extend ({
 		if(found){
 			return;
 		}
-
+*/
 		// otherwise, add the section
 		var section = new Section({config : sectionConfig});//, parent: this});
 		// here, section.cid will exist, and be unique (for this collection, at least);
 		this.get("sections").add(section);
-	}
+	},
 
 	removeSection : function(sectionID){
 		this.get("sections").remove(section);
@@ -367,9 +383,11 @@ Entity.getInstance = (function(){
 		entity.setConfig(entityConfig);
 
 		entity.reconcileConfig();
-		return "hey";
+		return entity;
 	};
 })();
+
+
 
 var SectionConfig = CouchModel.extend({
 
@@ -380,15 +398,26 @@ var SectionConfig = CouchModel.extend({
 		rand: null,
 	},
 
+	nestedCollections : ["propertyConfigs"],
+	nestedCollectionModels : {
+		propertyConfigs : PropertyConfig
+	},
+
 	initialize : function(){
 		//	this.load();			
-		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
+//		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
 		this.set("rand", Math.random(1000));
 	},
 
-	addPropertyConfig : function(){
+	addPropertyConfig : function(propertyConfig){
 		// what details do we need for a new, unformed propertyConfig?
-		var propertyConfig = new PropertyConfig({});
+		if(!propertyConfig){
+			var propertyConfig = new PropertyConfig({});
+		}
+		if(!propertyConfig.id){
+			var newid = this.id + "/" + propertyConfig.cid;
+			propertyConfig.set("_id", this.id + "/" + propertyConfig.cid);
+		}
 		this.get("propertyConfigs").add(propertyConfig);
 		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
 		// need to notify all sections that use this config that the config has changed.

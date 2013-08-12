@@ -36,9 +36,9 @@ var Workspace = Backbone.Router.extend({
 
 
 		// this can call the factory method for an entity, returning the entity object. 
-		var result = Entity.getInstance("thing");
+		//var result = Entity.getInstance("thing");
 
-		console.log(result);
+		//console.log(result);
 
 		// fake up some configs here
 		
@@ -57,21 +57,27 @@ var Workspace = Backbone.Router.extend({
 //			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
 		});
 
-		secconf1.addPropertyConfig(propconf1);
-		secconf1.addPropertyConfig(propconf2);
 
 
 		var entityConfig = new EntityConfig({_id: "config/" + type
 							});
 
+		entityConfig.load();
+
 		//entityConfig.load();
 
-		entityConfig.addSectionConfig(secconf1);
+	//	entityConfig.addSectionConfig(secconf1);
 
-		//entityConfig.store();
+	//	secconf1.addPropertyConfig(propconf1);
+	//	secconf1.addPropertyConfig(propconf2);
+
+
+
+//		entityConfig.store();
 		console.log("67");
 
 		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
+		entity.reconcileConfig();
 		console.log("70");
 //		var entity = new Entity({_id: "entity/"+type+"/"+id });
 		//entity.store();
@@ -80,6 +86,8 @@ var Workspace = Backbone.Router.extend({
 //		entity.addSection(secconf1);
 
 //		entity.store();
+
+console.log(entity);
 
 		var view = new EntityViewEditable({model : entity, 
 											el : this.viewElem, 
