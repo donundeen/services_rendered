@@ -97,16 +97,17 @@ var CouchModel = Backbone.Model.extend({
 			var doc = this.clone();//attributes;
 
 			$(this.nestedCollections).each(function(index, value){
+				var collectionListID = "nested_" + value;
 				var collection = doc.get(value);
 				var collectionids = [];
 				collection.each(function(item){
 					item.store();
 					collectionids.push(item.id);
 				});
-				doc.set(value, collectionids);
-
+				doc.set(collectionListID, collectionids);
+				doc.unset(value);
 			});
-				
+
 			$(this.dontSave).each(function(index, value){
 				if(doc.has(value)){
 					doc.unset(value);
@@ -138,32 +139,32 @@ var CouchModel = Backbone.Model.extend({
 			this.connect();
 		}		
 		if(this.serviceRunning){
+			realthis = this;
 			try{
-				realthis = this;
 				console.log("trying to load :: " + this.get("_id"));
 			    var storeddoc = this.db.open(this.get("_id"));
-			    console.log("did it work?");
-			    console.log(storedoc);
-			    this.set(storeddoc);
-
-				$(this.nestedCollections).each(function(index, value){
-					var collectionids = realthis.get(value);
-					var collection = new Backbone.Collection([], {model : this.nestedCollectionModels[value]});
-					$(collectionids).each(function(item_id){
-						item = new this.nestedCollectionModels[value]({_id : item_id});
-						item.load();
-						collection.add(item);
-					});
-					this.set(value, collection);
-				});
-
-			    console.log("loaded");
-			    this.set(overrides);
-			    console.log("loaded 2");
 			}catch(e){
 			    console.log("retrieval error");
 			    console.log(e); 
 			}
+		    console.log("did it work?");
+		    this.set(storeddoc);
+			$(this.nestedCollections).each(function(index, value){
+				var collectionListID = "nested_" + value;
+				var collection = realthis.get(value);
+				var collectionids = realthis.get(collectionListID);
+				$(collectionids).each(function(index, item_id){
+					var item = {_id : item_id};
+					collection.add(item);
+					var newitem = collection.at(collection.length - 1);
+					newitem.load();
+
+				});
+				realthis.set(value, collection);
+				realthis.unset(collectionListID);
+			});
+
+		    this.set(overrides);
 		}
 		this.postLoad();
 	},
@@ -208,14 +209,11 @@ var EntityConfig = CouchModel.extend({
 //	dontSave : ["sectionConfigs"] ,//["sections", "config"],
 
 	nestedCollections : ["sectionConfigs"],
-	nestedCollectionModels : {
-		"sectionConfigs" : SectionConfig
-	},
 
 	initialize : function(){
 		//	this.load();
 		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
-		//this.set("sectionConfigs", new Backbone.Collection([], {model : SectionConfig}));
+		this.set("sectionConfigs", new Backbone.Collection([], {model : SectionConfig}));
 		this.set("rand", Math.random());
 	},
 
@@ -399,13 +397,11 @@ var SectionConfig = CouchModel.extend({
 	},
 
 	nestedCollections : ["propertyConfigs"],
-	nestedCollectionModels : {
-		propertyConfigs : PropertyConfig
-	},
+
 
 	initialize : function(){
 		//	this.load();			
-//		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
+		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
 		this.set("rand", Math.random(1000));
 	},
 
