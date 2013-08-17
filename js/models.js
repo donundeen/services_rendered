@@ -397,7 +397,7 @@ var SectionConfig = CouchModel.extend({
 	},
 
 	nestedCollections : ["propertyConfigs"],
-
+   
 
 	initialize : function(){
 		//	this.load();			
