@@ -20,10 +20,10 @@ var Workspace = Backbone.Router.extend({
 		this.configElem = options.configElem;
 	},
 
+
 	defaultAction : function(stuff){
 		console.log("catchall " + stuff);
 	},
-
 
 
 	entity : function (type, id){
@@ -31,7 +31,8 @@ var Workspace = Backbone.Router.extend({
 		console.log("entity " + type + " : " + id);
 
 		var service = new Service({
-			uri : "http://someuri"
+			uri : "http://someuri",
+			new: true
 		});
 
 
@@ -42,59 +43,49 @@ var Workspace = Backbone.Router.extend({
 
 		// fake up some configs here
 		
-		var propconf1 = new PropertyConfig({
+
+		var propconf1 = PropertyConfig.getInstance(null, {
 			name : "countryCode",
-			type : "text"
+			type : "text",
+			new: true
 		});
-		var propconf2 = new PropertyConfig({
+		var propconf2 = PropertyConfig.getInstance(null, {
 			name : "state",
-			type : "text"
+			type : "text",
+			new: true
 		});
 
-		var secconf1 = new SectionConfig({
+
+		var secconf1 = SectionConfig.getInstance(null, {
 			name : "geography",
 			service : service,
-//			propertyConfigs :  new Backbone.Collection([propconf1, propconf2], {model : PropertyConfig}),
+			new: true
 		});
 
 
 
-		var entityConfig = new EntityConfig({_id: "config/" + type
-							});
-
-		entityConfig.load();
+		var entityConfig = EntityConfig.getInstance(type, {new:true});
 
 		//entityConfig.load();
-/*
+
 		entityConfig.addSectionConfig(secconf1);
 
 		secconf1.addPropertyConfig(propconf1);
 		secconf1.addPropertyConfig(propconf2);
-*/
 
 
-//		entityConfig.store();
-		console.log("67");
 
-		var entity = new Entity({_id: "entity/"+type+"/"+id ,config: entityConfig});
-		entity.reconcileConfig();
-		console.log("70");
-//		var entity = new Entity({_id: "entity/"+type+"/"+id });
+	//	entityConfig.store();
+
+		var entity = Entity.getInstance(id , type, {config: entityConfig, new : true});
+
 		//entity.store();
-//		entity.set({config: entityConfig});
 
-//		entity.addSection(secconf1);
-
-//		entity.store();
-
-console.log(entity);
 
 		var view = new EntityViewEditable({model : entity, 
 											el : this.viewElem, 
 											contentElem : this.headerElem,
 											configElem : this.configElem});
-		//entity.store();
-		//entityConfig.store();
 
 	},
 

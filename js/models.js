@@ -48,11 +48,10 @@ Backbone.sync = function(method, model){
 	console.log("started sync");
 	console.log(method + ": " );
 	console.log(model);
-	console.log("did dync")
+	console.log("did sync")
   	model.id = 1;
 
   	// so, I think save stuff happens here? or, put save method in individual models, or in CouchModel
-
   	// need to figure out how to make it work with couch, if we want to use this. just use our own store method for now.
 };
 
@@ -76,13 +75,9 @@ var CouchModel = Backbone.Model.extend({
 	connect : function (){
 
 		if(this.serviceRunning){
-			console.log("trying to connect???");
 			this.db = new CouchDB("http://localhost:8088/localhost:5984","example", {"X-Couch-Full-Commit":"false"});
-		console.log("connected?");
-		console.log(this.db);
 		}
 	},
-
 
 
 
@@ -114,6 +109,8 @@ var CouchModel = Backbone.Model.extend({
 				}
 			});
 
+			this.preSave(doc);
+
 			try{
 			    var saveresult = this.db.save(doc.attributes);
 			}catch(e){
@@ -125,8 +122,9 @@ var CouchModel = Backbone.Model.extend({
 	},
 
 	postStore : function (){
+	},
 
-
+	preSave : function(doc){
 	},
 
 	preStore : function(){
@@ -134,6 +132,10 @@ var CouchModel = Backbone.Model.extend({
 	},
 
 	load: function(overrides){
+
+		if(!this.has("_id")){
+			return;
+		}
 
 		if(this.db === null){
 			this.connect();
@@ -147,7 +149,6 @@ var CouchModel = Backbone.Model.extend({
 			    console.log("retrieval error");
 			    console.log(e); 
 			}
-		    console.log("did it work?");
 		    this.set(storeddoc);
 			$(this.nestedCollections).each(function(index, value){
 				var collectionListID = "nested_" + value;
@@ -158,12 +159,10 @@ var CouchModel = Backbone.Model.extend({
 					collection.add(item);
 					var newitem = collection.at(collection.length - 1);
 					newitem.load();
-
 				});
 				realthis.set(value, collection);
 				realthis.unset(collectionListID);
 			});
-
 		    this.set(overrides);
 		}
 		this.postLoad();
@@ -179,7 +178,8 @@ var CouchModel = Backbone.Model.extend({
 
 var Service = CouchModel.extend ({
 	// services encapsulate everything you need to describe a webservice, but not he specific CALL of that service.
-	/* things like : 
+	/* 
+		things like : 
 		uri
 		name
 		variables 
@@ -195,6 +195,22 @@ var Service = CouchModel.extend ({
 
 });
 
+// this can be the factory method for creating an object
+Service.getInstance = (function(){
+	return function(id, args){
+		if(!args){
+			args = {};
+		}
+		if(id){
+			args._id = id;
+		}
+		var service = new Service(args);
+		if(id && !args.new){
+			service.load();
+		}
+		return service;
+	};
+})();
 
 
 var EntityConfig = CouchModel.extend({
@@ -211,10 +227,11 @@ var EntityConfig = CouchModel.extend({
 	nestedCollections : ["sectionConfigs"],
 
 	initialize : function(){
-		//	this.load();
-		// load sectionConfigs (or maybe it gets saved with entityConfig already? )
-		this.set("sectionConfigs", new Backbone.Collection([], {model : SectionConfig}));
 		this.set("rand", Math.random());
+	},
+
+	resetSectionConfigs : function(){
+		this.set("sectionConfigs", new Backbone.Collection([], {model : SectionConfig}));
 	},
 
 	addSectionConfig : function(sectionConfig){
@@ -226,28 +243,38 @@ var EntityConfig = CouchModel.extend({
 
 		// therefore, need entities to be able to listen to 'addSectionConfig' events in thier config models
 		if(!sectionConfig){
-			sectionConfig = new SectionConfig({});
+			sectionConfig = SectionConfig.getInstance(null, {new:true});
+//			sectionConfig = new SectionConfig({});
 		}
 		if(!sectionConfig.id){
 			var newid = this.id + "/" + sectionConfig.cid;
 			sectionConfig.set("_id", newid);
 		}
+		console.log("adding sectionConfig");
 		this.get("sectionConfigs").add(sectionConfig);
 		this.set("rand", Math.random(1000)); // triggering change. Probably a better way, Need to listen for add event on the Colleciton, I think.
-
 	}
 });
 
 // this can be the factory method for creating an object
 EntityConfig.getInstance = (function(){
-	return function(id, type){
-		var entityConfigID = "config/" + type;
-		var entityConfig = new Entity({_id :  entityConfigID});
-		entityConfig.load();
-
+	return function(type, args){
+		if(!args){
+			args = {};
+		}
+		if(type){
+			var entityConfigID = "config/" + type;
+			args._id = entityConfigID;
+		}
+		var entityConfig = new EntityConfig(args);
+		entityConfig.resetSectionConfigs();
+		if(type && !args.new){
+			entityConfig.load();
+		}
 		return entityConfig;
 	};
 })();
+
 
 var Entity = CouchModel.extend ({
 
@@ -262,12 +289,6 @@ var Entity = CouchModel.extend ({
 	dontSave : ["sections", "config"] ,//["sections", "config"],
 
 	initialize : function(){
-	//	this.load(arguments[0]);
-		// now when this loads, we might need to load/save from db somehow.
-
-		var realthis = this;
-
-		// also, if the entity has sections NOT defined in the config, then remove them.
 	},
 
 	resetSections : function(){
@@ -296,7 +317,6 @@ var Entity = CouchModel.extend ({
 		this.get("config").get("sectionConfigs").each(function(sectionConfig){
 			// need to determine what sections are already in the object
 			// if the section is already in the entity, don't create it (how to determine?)
-			console.log("adding section");
 			realthis.addSection(sectionConfig);
 		});
 
@@ -313,7 +333,6 @@ var Entity = CouchModel.extend ({
 			});
 			if(found == false){
 				// remove the section
-				console.log("removing section");
 				realthis.removeSection(entitySection);
 			}
 		});					
@@ -345,7 +364,7 @@ var Entity = CouchModel.extend ({
 		}
 */
 		// otherwise, add the section
-		var section = new Section({config : sectionConfig});//, parent: this});
+		var section = Section.getInstance(null, {config : sectionConfig, new:true});//, parent: this});
 		// here, section.cid will exist, and be unique (for this collection, at least);
 		this.get("sections").add(section);
 	},
@@ -358,7 +377,7 @@ var Entity = CouchModel.extend ({
 
 // this can be the factory method for creating an object
 Entity.getInstance = (function(){
-	return function(id, type){
+	return function(id, type, args){
 		// this should load the appropriate stuff from couch, I think.
 
 		// first, load the config object
@@ -370,15 +389,33 @@ Entity.getInstance = (function(){
 		// load the nested objects in that config
 
 		// then, do any initialization on the object
-		console.log("in factory");
 
-		var entityConfig = EntityConfig.getInstance(type);
+		if(!args){
+			args = {};
+		}
+		if(id){
+			args._id = "entity/"+type+"/"+id;
+		}
+		var entity = new Entity(args);
 
-		var entity = new Entity();
+		if(!args || !args.config){
+			console.log("getting new config");
+			console.log(args);
+			var config = EntityConfig.getInstance(type, {new:true});
+			entity.setConfig(config);
+		}else{
+			entity.setConfig(args.config);
+		}
+
+		if(args.new){
+			entity.resetSections();
+		}
+
+		if(id && !args.new){
+			entity.load();
+		}
 
 		// load the entities sections?
-
-		entity.setConfig(entityConfig);
 
 		entity.reconcileConfig();
 		return entity;
@@ -394,15 +431,40 @@ var SectionConfig = CouchModel.extend({
 		propertyConfigs :  new Backbone.Collection([], {model : PropertyConfig}),	
 		name: "new section",	
 		rand: null,
+		service: null,
 	},
 
 	nestedCollections : ["propertyConfigs"],
    
 
 	initialize : function(){
-		//	this.load();			
-		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
+		//	this.load();	
+
+		// i think this needs to go into some other function, keep the initializer empty.
+		// make getInstance objects for all of these objects, ie factories.		yConfig}));
 		this.set("rand", Math.random(1000));
+	},
+
+
+	resetPropertyConfigs : function(){
+
+		this.set("propertyConfigs", new Backbone.Collection([], {model : PropertyConfig}));
+	},
+
+	preSave : function(doc){
+		if(this.get("service")){
+			doc.set("service_obj", this.get("service").attributes);
+		}else{
+			console.log("no service found");
+			console.log(this);
+		}
+	},	
+
+	postLoad : function(){
+		if(this.get("service_obj")){
+			this.set("service", new Service(this.get("service_obj")));
+			this.unset("service_obj");
+		}
 	},
 
 	addPropertyConfig : function(propertyConfig){
@@ -420,14 +482,29 @@ var SectionConfig = CouchModel.extend({
 	}
 });
 
+
+
 SectionConfig.getInstance = (function(){
-	return function(id){
-		var sectionConfig = new SectionConfig({_id : id});
-		sectionConfig.load();
+	return function(id, args){
+		if(!args){
+			args = {};
+		}
+		if(id){
+			args._id = id;
+		}
+		var sectionConfig = new SectionConfig(args);
 
+		if(args.new){
+			sectionConfig.resetPropertyConfigs();
+		}
+		if(id && !args.new){
+			sectionConfig.load();
+		}
+		return sectionConfig;
 	};
-
 })();
+
+
 
 var Section = CouchModel.extend ({
 
@@ -443,20 +520,31 @@ var Section = CouchModel.extend ({
 
 	initialize : function(){
 		var realthis = this;
-		//	this.load();		
-
-		// if i don't set the value here, it seems to get the properties of whatever the other section is. strange.
-		this.set("properties", new Backbone.Collection([], {model : Property}));
-
+		//	this.load();				
 		this.set("rand", Math.random(100));
 		// need to attach listener to the config, so that when the config changes, this class is notified.
+	},
+
+	setConfig : function(config){
+		this.set("config", config);
 		this.listenTo(this.get("config"), "change", this.configChanged);
 		this.listenTo(this.get("config").get("propertyConfigs"), "add", this.propertyConfigAdded);
+		this.reconcileConfig();
+	},
 
+	reconcileConfig : function(){
+		var realthis = this;
 		// load properties, by looking at this.configs propertyConfigs
 		this.get("config").get("propertyConfigs").each(function(propertyConfig){
 			realthis.addProperty(propertyConfig);
 		});		
+
+
+	},
+
+
+	resetProperties : function(){
+		this.set("properties", new Backbone.Collection([], {model : Property}));
 	},
 
 	configChanged : function(var1){
@@ -468,10 +556,36 @@ var Section = CouchModel.extend ({
 	},
 
 	addProperty : function(propertyConfig){
-		var property = new Property({config : propertyConfig });//, parent: this});
+		var property = Property.getInstance(null, {config : propertyConfig, new: true }); // new Property({config : propertyConfig });//, parent: this});
 		this.get("properties").add(property);
 	}
 });
+
+
+
+Section.getInstance = (function(){
+	return function(id, args){
+		if(!args){
+			args = {};
+		}
+		if(id){
+			args._id = id;
+		}
+		var section = new Section(args);
+		if(args.new){
+			section.resetProperties();
+		}
+		if(args.config){
+			section.setConfig(args.config);
+		}
+		if(id && !args.new){
+			section.load();
+		}
+		section.reconcileConfig();
+		return section;
+	};
+})();
+
 
 
 var PropertyConfig = CouchModel.extend ({
@@ -486,6 +600,26 @@ var PropertyConfig = CouchModel.extend ({
 		//this.load();
 	}
 });
+
+
+PropertyConfig.getInstance = (function(){
+	return function(id, args){
+		if(!args){
+			args = {};
+		}
+		if(id){
+			args._id = id;
+		}else{
+		}
+		var propertyConfig = new PropertyConfig(args);
+		if(id && !args.new){
+			propertyConfig.load();
+		}
+		return propertyConfig;
+	};
+})();
+
+
 
 var Property = CouchModel.extend ({
 
@@ -503,4 +637,23 @@ var Property = CouchModel.extend ({
 	//	this.load();
 	}
 });
+
+
+
+Property.getInstance = (function(){
+	return function(id, args){
+		if(!args){
+			args = {};
+		}
+		if(id){
+			args._id = id;
+		}
+		var property = new Property(args);
+		if(id && !args.new){
+			property.load();
+		}
+		return property;
+	};
+})();
+
 
