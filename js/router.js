@@ -64,15 +64,19 @@ var Workspace = Backbone.Router.extend({
 
 
 
-		var entityConfig = EntityConfig.getInstance(type, {new:true});
+//		var entityConfig = EntityConfig.getInstance(type, {new:true});
+		var entityConfig = EntityConfig.getInstance(type);//, {new:true});
 
-		//entityConfig.load();
+		entityConfig.load();
 
+		console.log(entityConfig);
+
+/*
 		entityConfig.addSectionConfig(secconf1);
 
 		secconf1.addPropertyConfig(propconf1);
 		secconf1.addPropertyConfig(propconf2);
-
+*/
 
 
 	//	entityConfig.store();

@@ -153,12 +153,12 @@ var CouchModel = Backbone.Model.extend({
 			$(this.nestedCollections).each(function(index, value){
 				var collectionListID = "nested_" + value;
 				var collection = realthis.get(value);
+				console.log(value);
 				var collectionids = realthis.get(collectionListID);
+				var factoryMethod = realthis.get("factoryMethods")[value];
 				$(collectionids).each(function(index, item_id){
-					var item = {_id : item_id};
+					var item = factoryMethod(item_id);
 					collection.add(item);
-					var newitem = collection.at(collection.length - 1);
-					newitem.load();
 				});
 				realthis.set(value, collection);
 				realthis.unset(collectionListID);
@@ -228,6 +228,7 @@ var EntityConfig = CouchModel.extend({
 
 	initialize : function(){
 		this.set("rand", Math.random());
+		this.set("factoryMethods", {sectionConfigs : SectionConfig.getInstance});
 	},
 
 	resetSectionConfigs : function(){
@@ -443,6 +444,8 @@ var SectionConfig = CouchModel.extend({
 		// i think this needs to go into some other function, keep the initializer empty.
 		// make getInstance objects for all of these objects, ie factories.		yConfig}));
 		this.set("rand", Math.random(1000));
+		this.set("factoryMethods", {propertyConfigs : PropertyConfig.getInstance});
+
 	},
 
 
@@ -503,6 +506,9 @@ SectionConfig.getInstance = (function(){
 		return sectionConfig;
 	};
 })();
+
+
+
 
 
 
