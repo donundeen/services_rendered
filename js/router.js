@@ -83,7 +83,7 @@ var Workspace = Backbone.Router.extend({
 
 		var entity = Entity.getInstance(id , type, {config: entityConfig, new : true});
 
-		//entity.store();
+		entity.store();
 
 
 		var view = new EntityViewEditable({model : entity, 

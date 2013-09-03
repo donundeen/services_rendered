@@ -93,9 +93,13 @@ var CouchModel = Backbone.Model.extend({
 
 			$(this.nestedCollections).each(function(index, value){
 				var collectionListID = "nested_" + value;
+				console.log("storing " +collectionListID);
 				var collection = doc.get(value);
+				console.log(collection);
 				var collectionids = [];
 				collection.each(function(item){
+					console.log("about to store " + item.id);
+					console.log(item);
 					item.store();
 					collectionids.push(item.id);
 				});
@@ -161,6 +165,7 @@ var CouchModel = Backbone.Model.extend({
 					collection.add(item);
 				});
 				realthis.set(value, collection);
+				console.log("unsetting " + collectionListID);
 				realthis.unset(collectionListID);
 			});
 		    this.set(overrides);
@@ -287,10 +292,15 @@ var Entity = CouchModel.extend ({
 	},
 
 
-	dontSave : ["sections", "config"] ,//["sections", "config"],
+	dontSave : ["config"] ,//["sections", "config"],
+
+	nestedCollections : ["sections"],
 
 	initialize : function(){
+		this.set("rand", Math.random());
+		this.set("factoryMethods", {sections : Section.getInstance});
 	},
+
 
 	resetSections : function(){
 		this.set("sections", new Backbone.Collection([], {model : Section}));
@@ -367,6 +377,9 @@ var Entity = CouchModel.extend ({
 		// otherwise, add the section
 		var section = Section.getInstance(null, {config : sectionConfig, new:true});//, parent: this});
 		// here, section.cid will exist, and be unique (for this collection, at least);
+		if(!section.id){
+			section.set("_id", this.id+"/"+section.cid);
+		}
 		this.get("sections").add(section);
 	},
 
@@ -457,6 +470,7 @@ var SectionConfig = CouchModel.extend({
 	preSave : function(doc){
 		if(this.get("service")){
 			doc.set("service_obj", this.get("service").attributes);
+			doc.unset("service");
 		}else{
 			console.log("no service found");
 			console.log(this);
@@ -516,19 +530,19 @@ var Section = CouchModel.extend ({
 
 	config : null,
 
-	dontSave : ["properties", "config"],
 
 	defaults : {
 		ident : "Section",
 		properties :  new Backbone.Collection([], {model : Property}),
 		rand : Math.random()
 	},
+	dontSave : ["config"] ,//["sections", "config"],
+
+	nestedCollections : ["properties"],
 
 	initialize : function(){
-		var realthis = this;
-		//	this.load();				
-		this.set("rand", Math.random(100));
-		// need to attach listener to the config, so that when the config changes, this class is notified.
+		this.set("rand", Math.random());
+		this.set("factoryMethods", {properties : Property.getInstance});
 	},
 
 	setConfig : function(config){
@@ -541,8 +555,18 @@ var Section = CouchModel.extend ({
 	reconcileConfig : function(){
 		var realthis = this;
 		// load properties, by looking at this.configs propertyConfigs
+		// don't add properties aleady in there!
 		this.get("config").get("propertyConfigs").each(function(propertyConfig){
-			realthis.addProperty(propertyConfig);
+			var exists = false;
+			realthis.get("properties").each(function(property){
+				if(property.get("config") == propertyConfig){
+					exists = true;
+					return false;
+				}
+			});
+			if(!exists){
+				realthis.addProperty(propertyConfig);
+			}
 		});		
 
 
@@ -562,7 +586,12 @@ var Section = CouchModel.extend ({
 	},
 
 	addProperty : function(propertyConfig){
+		console.log("adding property");
 		var property = Property.getInstance(null, {config : propertyConfig, new: true }); // new Property({config : propertyConfig });//, parent: this});
+		if(!property.id){
+			property.set("_id", this.get("cid")+"/"+property.cid);
+		}
+
 		this.get("properties").add(property);
 	}
 });

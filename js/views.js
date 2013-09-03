@@ -113,6 +113,7 @@ var SectionViewEditable = Backbone.View.extend({
 		this.propertiesElem.empty();
 
 		this.model.get("properties").each(function(property){
+			console.log("propetyView ");
 			var propElem = $("<div class='propertyDiv'>section:"+realthis.model.get("rand")+"</div>");
 			realthis.propertiesElem.append(propElem);			
 			new PropertyViewEditable({model : property, el : propElem, parent : realthis});
@@ -150,7 +151,7 @@ var EntityConfigViewEditable = Backbone.View.extend ({
 		var addSectionDiv = $("<span>add Section</span>");
 		this.editDiv.append(addSectionDiv);
 		addSectionDiv.click(function(){
-		
+
 			realthis.model.addSectionConfig();
 		});
 
