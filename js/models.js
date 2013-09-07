@@ -2,7 +2,7 @@
 
 /*
 Service :
-- has a url (assuming REST)
+- has a url (assuming REST) 
 - urls request parameters, that go into url
 - response type (xml/json)
 - binding response values to property names (using jpaht, xpath, etc)
@@ -158,8 +158,11 @@ var CouchModel = Backbone.Model.extend({
 				var collectionListID = "nested_" + value;
 				var collection = realthis.get(value);
 				console.log(value);
+				console.log(realthis);
 				var collectionids = realthis.get(collectionListID);
 				var factoryMethod = realthis.get("factoryMethods")[value];
+				console.log("fact");
+				console.log(factoryMethod);
 				$(collectionids).each(function(index, item_id){
 					var item = factoryMethod(item_id);
 					collection.add(item);
@@ -373,13 +376,10 @@ var Entity = CouchModel.extend ({
 		if(found){
 			return;
 		}
-*/
+		*/
 		// otherwise, add the section
-		var section = Section.getInstance(null, {config : sectionConfig, new:true});//, parent: this});
+		var section = Section.getInstance(null, {config : sectionConfig, new:true, base_id : this.id+"/"});//, parent: this});
 		// here, section.cid will exist, and be unique (for this collection, at least);
-		if(!section.id){
-			section.set("_id", this.id+"/"+section.cid);
-		}
 		this.get("sections").add(section);
 	},
 
@@ -589,7 +589,9 @@ var Section = CouchModel.extend ({
 		console.log("adding property");
 		var property = Property.getInstance(null, {config : propertyConfig, new: true }); // new Property({config : propertyConfig });//, parent: this});
 		if(!property.id){
-			property.set("_id", this.get("cid")+"/"+property.cid);
+			property.set("_id", this.get("_id")+"/"+property.cid);
+		}else{
+			console.log("don't need to set property id");
 		}
 
 		this.get("properties").add(property);
@@ -609,6 +611,9 @@ Section.getInstance = (function(){
 		var section = new Section(args);
 		if(args.new){
 			section.resetProperties();
+		}
+		if(args.base_id){
+			section.set("_id", args.base_id + section.cid);
 		}
 		if(args.config){
 			section.setConfig(args.config);
@@ -647,6 +652,9 @@ PropertyConfig.getInstance = (function(){
 		}else{
 		}
 		var propertyConfig = new PropertyConfig(args);
+		if(args.base_id){
+			section.set("_id", args.base_id + section.cid);
+		}		
 		if(id && !args.new){
 			propertyConfig.load();
 		}
