@@ -17,7 +17,7 @@ $data = @$_REQUEST['data'];
 $curl_opts = @$_REQUEST['curl_opts'];
 
 $user = "undeed";
-$pass = "moronio";
+$pass = "*******";
 
 $fromcache = "";
 $notfromcache = "";
